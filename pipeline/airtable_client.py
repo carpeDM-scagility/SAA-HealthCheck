@@ -16,6 +16,7 @@ from config import (
     ORG_NAME, ORG_WEBSITE, ORG_FACEBOOK, ORG_INSTAGRAM,
     ORG_EMAIL, ORG_EIN, ORG_STATE, ORG_SCOPE,
     ORG_HEALTH_SCORE, ORG_HEALTH_TIER, ORG_LAST_SCORED,
+    SM_COLLECTION_DATE, FIN_TAX_YEAR, HS_SCORE_DATE,
 )
 
 log = logging.getLogger(__name__)
@@ -23,7 +24,8 @@ log = logging.getLogger(__name__)
 
 class AirtableClient:
     def __init__(self):
-        api = Api(AIRTABLE_API_KEY)
+        # use_field_ids=True: Airtable returns field IDs as keys, matching our config constants
+        api = Api(AIRTABLE_API_KEY, use_field_ids=True)
         self.orgs      = api.table(AIRTABLE_BASE_ID, TABLE_ORGANIZATIONS)
         self.scores    = api.table(AIRTABLE_BASE_ID, TABLE_HEALTH_SCORES)
         self.social    = api.table(AIRTABLE_BASE_ID, TABLE_SOCIAL_METRICS)
@@ -67,8 +69,9 @@ class AirtableClient:
 
     def get_social_metrics_for_org(self, org_record_id: str, limit: int = 6) -> list[dict]:
         """Get the most recent social metric snapshots for an org."""
+        # pyairtable v2: prefix field ID with "-" for descending sort
         records = self.social.all(
-            sort=[{"field": "Collection Date", "direction": "desc"}]
+            sort=[f"-{SM_COLLECTION_DATE}"]
         )
         org_records = [
             self._flatten(r) for r in records
@@ -84,7 +87,7 @@ class AirtableClient:
     def get_financial_for_org(self, org_record_id: str) -> list[dict]:
         """Get all financial records for an org, sorted by tax year desc."""
         records = self.financial.all(
-            sort=[{"field": "Tax Year", "direction": "desc"}]
+            sort=[f"-{FIN_TAX_YEAR}"]
         )
         return [
             self._flatten(r) for r in records
@@ -98,7 +101,7 @@ class AirtableClient:
 
     def get_health_scores_for_org(self, org_record_id: str, limit: int = 4) -> list[dict]:
         records = self.scores.all(
-            sort=[{"field": "Score Date", "direction": "desc"}]
+            sort=[f"-{HS_SCORE_DATE}"]
         )
         org_records = [
             self._flatten(r) for r in records
