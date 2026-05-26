@@ -1,0 +1,103 @@
+name: SAA Org Health Pipeline
+
+on:
+  schedule:
+    # Monthly: website + social collection (1st of every month at 6am ET)
+    - cron: '0 10 1 * *'
+    # Quarterly: full pipeline with financials + scoring (1st of Jan/Apr/Jul/Oct)
+    - cron: '0 10 1 1,4,7,10 *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Pipeline mode'
+        required: true
+        default: 'monthly'
+        type: choice
+        options:
+          - monthly
+          - quarterly
+          - dry-run
+
+jobs:
+  monthly-collection:
+    name: Monthly — Website & Social
+    runs-on: ubuntu-latest
+    # Skip on quarterly months (those will run the quarterly job instead)
+    if: |
+      github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'monthly'
+      || (github.event_name == 'schedule' && !contains('1 4 7 10', format('{0}', fromJSON('{"jan":1,"feb":2,"mar":3,"apr":4,"may":5,"jun":6,"jul":7,"aug":8,"sep":9,"oct":10,"nov":11,"dec":12}'))))
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r pipeline/requirements.txt
+
+      - name: Run monthly collection
+        working-directory: pipeline
+        env:
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+          META_APP_ID:      ${{ secrets.META_APP_ID }}
+          META_APP_SECRET:  ${{ secrets.META_APP_SECRET }}
+          APIFY_TOKEN:      ${{ secrets.APIFY_TOKEN }}
+        run: python run_monthly.py
+
+  quarterly-pipeline:
+    name: Quarterly — Full Pipeline
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'quarterly'
+      || github.event_name == 'schedule'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r pipeline/requirements.txt
+
+      - name: Run quarterly pipeline
+        working-directory: pipeline
+        env:
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+          META_APP_ID:      ${{ secrets.META_APP_ID }}
+          META_APP_SECRET:  ${{ secrets.META_APP_SECRET }}
+          APIFY_TOKEN:      ${{ secrets.APIFY_TOKEN }}
+        run: python run_quarterly.py
+
+  dry-run:
+    name: Dry Run (no writes)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'dry-run'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r pipeline/requirements.txt
+
+      - name: Dry run (prints results, no Airtable writes)
+        working-directory: pipeline
+        env:
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+          META_APP_ID:      ${{ secrets.META_APP_ID }}
+          META_APP_SECRET:  ${{ secrets.META_APP_SECRET }}
+          APIFY_TOKEN:      ${{ secrets.APIFY_TOKEN }}
+        run: python run_quarterly.py --dry-run
