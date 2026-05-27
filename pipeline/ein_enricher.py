@@ -25,7 +25,7 @@ from pathlib import Path
 
 import requests
 
-from airtable_client import AirtableClient
+from supabase_client import DbClient as AirtableClient
 from config import ORG_NAME, ORG_EIN, ORG_STATE, HTTP_TIMEOUT
 
 log = logging.getLogger(__name__)
