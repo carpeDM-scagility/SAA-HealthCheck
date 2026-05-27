@@ -29,7 +29,7 @@ from config import (
 log = logging.getLogger(__name__)
 
 GRAPH_API_BASE = "https://graph.facebook.com/v19.0"
-APIFY_ACTOR_ID = "apify/instagram-profile-scraper"
+APIFY_ACTOR_ID = "apify~instagram-profile-scraper"
 
 
 # ─────────────────────────────────────────────────────────────
