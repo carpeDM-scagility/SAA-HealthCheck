@@ -16,7 +16,7 @@ from urllib.parse import urlparse
 
 import requests
 
-from airtable_client import AirtableClient
+from supabase_client import DbClient as AirtableClient
 from config import (
     ORG_NAME, ORG_FACEBOOK, ORG_INSTAGRAM,
     SM_COLLECTION_DATE, SM_ORGANIZATION, SM_PLATFORM,
