@@ -1,7 +1,0 @@
-# SAA Org Health Tracker — Python dependencies
-# Install with: pip install -r requirements.txt
-
-pyairtable>=2.3.0       # Airtable API client
-requests>=2.31.0        # HTTP requests (website monitor, APIs)
-apify-client>=1.6.0     # Apify platform client (Instagram scraping)
-python-dateutil>=2.8.2  # Date parsing utilities
