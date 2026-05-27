@@ -16,7 +16,9 @@ from config import (
     ORG_NAME, ORG_WEBSITE, ORG_FACEBOOK, ORG_INSTAGRAM,
     ORG_EMAIL, ORG_EIN, ORG_STATE, ORG_SCOPE,
     ORG_HEALTH_SCORE, ORG_HEALTH_TIER, ORG_LAST_SCORED,
-    SM_COLLECTION_DATE, FIN_TAX_YEAR, HS_SCORE_DATE,
+    SM_COLLECTION_DATE, SM_ORGANIZATION,
+    FIN_TAX_YEAR, FIN_ORGANIZATION,
+    HS_SCORE_DATE, HS_ORGANIZATION,
 )
 
 log = logging.getLogger(__name__)
@@ -81,7 +83,7 @@ class AirtableClient:
         )
         org_records = [
             self._flatten(r) for r in records
-            if org_record_id in (r["fields"].get("Organization") or [])
+            if org_record_id in (r["fields"].get(SM_ORGANIZATION) or [])
         ]
         return org_records[:limit]
 
@@ -97,7 +99,7 @@ class AirtableClient:
         )
         return [
             self._flatten(r) for r in records
-            if org_record_id in (r["fields"].get("Organization") or [])
+            if org_record_id in (r["fields"].get(FIN_ORGANIZATION) or [])
         ]
 
     # ── Health Scores ────────────────────────────────────────
@@ -111,7 +113,7 @@ class AirtableClient:
         )
         org_records = [
             self._flatten(r) for r in records
-            if org_record_id in (r["fields"].get("Organization") or [])
+            if org_record_id in (r["fields"].get(HS_ORGANIZATION) or [])
         ]
         return org_records[:limit]
 
