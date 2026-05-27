@@ -13,7 +13,7 @@ from typing import Any
 
 import requests
 
-from airtable_client import AirtableClient
+from supabase_client import DbClient as AirtableClient
 from config import (
     ORG_NAME, ORG_EIN,
     FIN_TAX_YEAR, FIN_ORGANIZATION, FIN_TOTAL_REVENUE, FIN_TOTAL_EXPENSES,
