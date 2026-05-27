@@ -18,7 +18,7 @@ from config import (
     ORG_NAME, ORG_EIN,
     FIN_TAX_YEAR, FIN_ORGANIZATION, FIN_TOTAL_REVENUE, FIN_TOTAL_EXPENSES,
     FIN_PROGRAM_EXP, FIN_NET_ASSETS, FIN_PROGRAM_RATIO, FIN_REVENUE_YOY,
-    FIN_NUM_EMPLOYEES, FIN_DATA_SOURCE, FIN_FILING_DATE, FIN_EIN_VERIFIED,
+    FIN_NUM_EMPLOYEES, FIN_FILING_DATE, FIN_EIN_VERIFIED,
     HTTP_TIMEOUT,
 )
 
@@ -172,7 +172,6 @@ def filing_to_airtable_fields(filing: dict, org_record_id: str) -> dict:
     fields = {
         FIN_TAX_YEAR:     filing["tax_year"],
         FIN_ORGANIZATION: [org_record_id],
-        FIN_DATA_SOURCE:  "ProPublica",
         FIN_EIN_VERIFIED: True,
     }
     if filing.get("total_revenue") is not None:
