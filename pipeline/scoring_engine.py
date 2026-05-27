@@ -10,12 +10,12 @@ import logging
 from datetime import date, datetime, timedelta
 from typing import Any
 
-from airtable_client import AirtableClient
+from supabase_client import DbClient as AirtableClient
 from config import (
-    ORG_NAME, ORG_EIN,
+    ORG_NAME, ORG_EIN, ORG_WEBSITE, ORG_FACEBOOK, ORG_INSTAGRAM,
     SM_PLATFORM, SM_IS_ACTIVE, SM_FOLLOWERS, SM_POSTS_30D,
     SM_POSTS_90D, SM_LAST_POST_DATE, SM_ENGAGEMENT_RATE,
-    SM_AVG_LIKES, SM_AVG_COMMENTS, SM_FOLLOWER_GROWTH,
+    SM_AVG_LIKES, SM_AVG_COMMENTS, SM_FOLLOWER_GROWTH, SM_RAW_DATA,
     FIN_TAX_YEAR, FIN_PROGRAM_RATIO, FIN_REVENUE_YOY,
     FIN_TOTAL_REVENUE, FIN_TOTAL_EXPENSES, FIN_NET_ASSETS,
     HS_SCORE_DATE, HS_ORGANIZATION, HS_TOTAL_SCORE, HS_HEALTH_TIER,
@@ -26,10 +26,6 @@ from config import (
 )
 
 log = logging.getLogger(__name__)
-
-ORG_FACEBOOK  = "fldJmri85xmMUD9IH"
-ORG_INSTAGRAM = "flduJOtgYnFtOkUxo"
-ORG_WEBSITE   = "fldmSdoEQJWeiA21p"
 
 
 # ─────────────────────────────────────────────────────────────
@@ -53,7 +49,7 @@ def score_presence(org: dict, website_metric: dict | None) -> float:
 
     # SSL valid (from raw data)
     if website_live:
-        raw = website_metric.get("Raw Data", "")
+        raw = website_metric.get(SM_RAW_DATA, "")
         if "'ssl_valid': True" in str(raw):
             score += 10
 
@@ -66,7 +62,7 @@ def score_presence(org: dict, website_metric: dict | None) -> float:
     # Has contact info / email
     has_email = bool(org.get("Email"))
     has_contact_on_site = website_live and "'has_contact': True" in str(
-        website_metric.get("Raw Data", "")
+        website_metric.get(SM_RAW_DATA, "")
     )
     if has_email or has_contact_on_site:
         score += 10
@@ -385,7 +381,7 @@ def score_org(org: dict, client: AirtableClient) -> dict | None:
     tier = score_to_tier(total)
 
     # QoQ change and trend
-    prior_score = prior_scores[0].get("Total Score") if prior_scores else None
+    prior_score = prior_scores[0].get(HS_TOTAL_SCORE) if prior_scores else None
     qoq_change = round(total - prior_score, 1) if prior_score is not None else None
     trend = compute_trend(total, prior_score)
 
