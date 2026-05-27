@@ -1,87 +1,86 @@
 """
 SAA Org Health Tracker — Configuration
-All Airtable field IDs, table IDs, scoring weights, and constants live here.
-Update this file if you rename fields in Airtable.
+Column names match the Supabase schema exactly.
+Update this file if you rename columns in Supabase.
 """
 
 import os
 
 # ─────────────────────────────────────────────────────────────
-# Airtable credentials (set as environment variables or GitHub secrets)
+# Supabase credentials (set as environment variables / GitHub secrets)
 # ─────────────────────────────────────────────────────────────
-AIRTABLE_API_KEY = os.environ.get("AIRTABLE_API_KEY", "")
-AIRTABLE_BASE_ID = "app6ACspUBzaoNnAQ"
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
 
 # ─────────────────────────────────────────────────────────────
-# Table IDs
+# Table names
 # ─────────────────────────────────────────────────────────────
-TABLE_ORGANIZATIONS  = "tblgKYNjvlQNU9I24"
-TABLE_HEALTH_SCORES  = "tblKFO3HpkoOO5HPj"
-TABLE_SOCIAL_METRICS = "tblSw6F4oZNH99xSF"
-TABLE_FINANCIAL      = "tblj8lKAPrJl9Xn5A"
+TABLE_ORGANIZATIONS  = "organizations"
+TABLE_HEALTH_SCORES  = "health_scores"
+TABLE_SOCIAL_METRICS = "social_metrics"
+TABLE_FINANCIAL      = "financial_metrics"
 
 # ─────────────────────────────────────────────────────────────
-# Organizations — field IDs
+# Organizations — column names
 # ─────────────────────────────────────────────────────────────
-ORG_NAME         = "fldq57nc4EWYzPHWJ"
-ORG_WEBSITE      = "fldmSdoEQJWeiA21p"
-ORG_FACEBOOK     = "fldJmri85xmMUD9IH"
-ORG_INSTAGRAM    = "flduJOtgYnFtOkUxo"
-ORG_EMAIL        = "fldfNnzXXgJwDsvPu"
-ORG_EIN          = "fldO8m4pd5pi0S5cQ"
-ORG_STATE        = "fldhcuHfhKzXdvSRo"
-ORG_SCOPE        = "fld0N0AdEmxYDlAMX"
-ORG_HEALTH_SCORE = "fld3vKoXPcKYtU7st"
-ORG_HEALTH_TIER  = "fldKXHE9igr9m3fCs"
-ORG_LAST_SCORED  = "fldWe3qFg6GRlFgfQ"
+ORG_NAME         = "name"
+ORG_WEBSITE      = "website_url"
+ORG_FACEBOOK     = "facebook_url"
+ORG_INSTAGRAM    = "instagram_url"
+ORG_EMAIL        = "email"
+ORG_EIN          = "ein"
+ORG_STATE        = "state"
+ORG_SCOPE        = "scope"
+ORG_HEALTH_SCORE = "health_score"
+ORG_HEALTH_TIER  = "health_tier"
+ORG_LAST_SCORED  = "last_scored"
 
 # ─────────────────────────────────────────────────────────────
-# Health Scores — field IDs
+# Social Metrics — column names
 # ─────────────────────────────────────────────────────────────
-HS_SCORE_DATE      = "fldfRse6kswEikoVr"
-HS_ORGANIZATION    = "fldagIiV0cZWAjyjM"
-HS_TOTAL_SCORE     = "fldjy6gQcaeG8YM6n"
-HS_HEALTH_TIER     = "fldFpy61aH2F3EJlB"
-HS_PRESENCE_SCORE  = "fldjW6gUeKb6ZuM7k"
-HS_ACTIVITY_SCORE  = "fld5dgn47kqG9ZdJ9"
-HS_REACH_SCORE     = "fldlrDINXmo9Hnn5q"
-HS_FINANCIAL_SCORE = "fldJ1AsXpa2mCODOt"
-HS_QOQ_CHANGE      = "fldOS3JaPtjdBFzAx"
-HS_TREND           = "fldWnZPmHTkbofVqU"
-HS_NOTES           = "fldrn8TVE7kcdSdJ8"
+SM_COLLECTION_DATE = "collected_on"
+SM_ORGANIZATION    = "organization_id"
+SM_PLATFORM        = "platform"
+SM_IS_ACTIVE       = "is_active"
+SM_FOLLOWERS       = "followers"
+SM_POSTS_30D       = "posts_30d"
+SM_POSTS_90D       = "posts_90d"
+SM_LAST_POST_DATE  = "last_post_date"
+SM_ENGAGEMENT_RATE = "engagement_rate"
+SM_AVG_LIKES       = "avg_likes"
+SM_AVG_COMMENTS    = "avg_comments"
+SM_FOLLOWER_GROWTH = "follower_growth"
+SM_RAW_DATA        = "raw_data"
 
 # ─────────────────────────────────────────────────────────────
-# Social Metrics — field IDs
+# Financial Metrics — column names
 # ─────────────────────────────────────────────────────────────
-SM_COLLECTION_DATE   = "fldscJ4YW6BI2stye"
-SM_ORGANIZATION      = "fldo1L7eWiqfQfWVK"
-SM_PLATFORM          = "fld2PNRo7gldvuCTg"
-SM_IS_ACTIVE         = "fld4vx6rdIiGxHYPz"
-SM_FOLLOWERS         = "fld72IXEWj799yEnu"
-SM_POSTS_30D         = "fldnPZ04LuD3eD7Vp"
-SM_POSTS_90D         = "fldoJfodMXGytagU2"
-SM_LAST_POST_DATE    = "fldDoD1q5FFvcKDBv"
-SM_ENGAGEMENT_RATE   = "fldE0ITj9bsJrzI1O"
-SM_AVG_LIKES         = "fld2XuLBlj5SHPji7"
-SM_AVG_COMMENTS      = "fldpj45T2LSAUwpV9"
-SM_FOLLOWER_GROWTH   = "fldUGCnKQJDQQsr3M"
-SM_RAW_DATA          = "fldIB6uQPcYAZURRZ"
+FIN_TAX_YEAR     = "tax_year"
+FIN_ORGANIZATION = "organization_id"
+FIN_TOTAL_REVENUE   = "total_revenue"
+FIN_TOTAL_EXPENSES  = "total_expenses"
+FIN_PROGRAM_EXP     = "program_expenses"
+FIN_NET_ASSETS      = "net_assets"
+FIN_PROGRAM_RATIO   = "program_ratio"
+FIN_REVENUE_YOY     = "revenue_yoy"
+FIN_NUM_EMPLOYEES   = "num_employees"
+FIN_FILING_DATE     = "filing_date"
+FIN_EIN_VERIFIED    = "ein_verified"
 
 # ─────────────────────────────────────────────────────────────
-# Financial Metrics — field IDs
+# Health Scores — column names
 # ─────────────────────────────────────────────────────────────
-FIN_TAX_YEAR        = "fldF1ILKkl3toJc5d"
-FIN_ORGANIZATION    = "fldr9AqgjimCtZ0xQ"
-FIN_TOTAL_REVENUE   = "fld7tQ6ZXfr2JFIo4"
-FIN_TOTAL_EXPENSES  = "fld1upIl1Uk0SZ5Tc"
-FIN_PROGRAM_EXP     = "fldr8DyYBFwlGHGXD"
-FIN_NET_ASSETS      = "fldQr4kbzdqyXZn7O"
-FIN_PROGRAM_RATIO   = "fldDWA77ouf5tH7Z9"
-FIN_REVENUE_YOY     = "fldaYWUpzbV7CvpLz"
-FIN_NUM_EMPLOYEES   = "fldxYpijCUZC8BwjA"
-FIN_DATA_SOURCE     = "fld97kZoKJhgA67QJ"
-FIN_FILING_DATE     = "fldaPqQErE43E7sCZ"
-FIN_EIN_VERIFIED    = "fldB2q7QYv8blPjiY"
+HS_SCORE_DATE      = "scored_on"
+HS_ORGANIZATION    = "organization_id"
+HS_TOTAL_SCORE     = "total_score"
+HS_HEALTH_TIER     = "health_tier"
+HS_PRESENCE_SCORE  = "presence_score"
+HS_ACTIVITY_SCORE  = "activity_score"
+HS_REACH_SCORE     = "reach_score"
+HS_FINANCIAL_SCORE = "financial_score"
+HS_QOQ_CHANGE      = "qoq_change"
+HS_TREND           = "trend"
+HS_NOTES           = "notes"
 
 # ─────────────────────────────────────────────────────────────
 # Scoring weights (must sum to 1.0)
@@ -93,7 +92,6 @@ WEIGHTS_WITH_FINANCIAL = {
     "financial": 0.20,
 }
 
-# Reweighted when no 990 data is available
 WEIGHTS_NO_FINANCIAL = {
     "presence": 0.30,
     "activity": 0.38,
@@ -101,17 +99,15 @@ WEIGHTS_NO_FINANCIAL = {
 }
 
 # Health tier thresholds
-TIER_HEALTHY  = 75
-TIER_STABLE   = 50
-TIER_AT_RISK  = 25
-# Below 25 = Critical
+TIER_HEALTHY = 75
+TIER_STABLE  = 50
+TIER_AT_RISK = 25
 
 # ─────────────────────────────────────────────────────────────
-# External API credentials (set as environment variables)
+# External API credentials
 # ─────────────────────────────────────────────────────────────
 META_APP_ID     = os.environ.get("META_APP_ID", "")
 META_APP_SECRET = os.environ.get("META_APP_SECRET", "")
 APIFY_TOKEN     = os.environ.get("APIFY_TOKEN", "")
 
-# Request timeouts (seconds)
 HTTP_TIMEOUT = 15
