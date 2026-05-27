@@ -55,6 +55,12 @@ class AirtableClient:
     def get_orgs_with_ein(self) -> list[dict]:
         return [o for o in self.get_all_orgs() if o.get(ORG_EIN)]
 
+    def get_orgs_without_ein(self) -> list[dict]:
+        return [o for o in self.get_all_orgs() if not o.get(ORG_EIN)]
+
+    def update_org_ein(self, record_id: str, ein: str) -> None:
+        self.orgs.update(record_id, {ORG_EIN: ein})
+
     def update_org_score(self, record_id: str, score: float, tier: str) -> None:
         self.orgs.update(record_id, {
             ORG_HEALTH_SCORE: round(score, 1),
