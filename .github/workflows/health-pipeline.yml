@@ -42,10 +42,11 @@ jobs:
       - name: Run monthly collection
         working-directory: pipeline
         env:
-          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
-          META_APP_ID:      ${{ secrets.META_APP_ID }}
-          META_APP_SECRET:  ${{ secrets.META_APP_SECRET }}
-          APIFY_TOKEN:      ${{ secrets.APIFY_TOKEN }}
+          SUPABASE_URL:    ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY:    ${{ secrets.SUPABASE_KEY }}
+          META_APP_ID:     ${{ secrets.META_APP_ID }}
+          META_APP_SECRET: ${{ secrets.META_APP_SECRET }}
+          APIFY_TOKEN:     ${{ secrets.APIFY_TOKEN }}
         run: python run_monthly.py
 
   quarterly-pipeline:
@@ -70,10 +71,11 @@ jobs:
       - name: Run quarterly pipeline
         working-directory: pipeline
         env:
-          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
-          META_APP_ID:      ${{ secrets.META_APP_ID }}
-          META_APP_SECRET:  ${{ secrets.META_APP_SECRET }}
-          APIFY_TOKEN:      ${{ secrets.APIFY_TOKEN }}
+          SUPABASE_URL:    ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY:    ${{ secrets.SUPABASE_KEY }}
+          META_APP_ID:     ${{ secrets.META_APP_ID }}
+          META_APP_SECRET: ${{ secrets.META_APP_SECRET }}
+          APIFY_TOKEN:     ${{ secrets.APIFY_TOKEN }}
         run: python run_quarterly.py
 
   dry-run:
@@ -93,11 +95,12 @@ jobs:
       - name: Install dependencies
         run: pip install -r pipeline/requirements.txt
 
-      - name: Dry run (prints results, no Airtable writes)
+      - name: Dry run (prints results, no Supabase writes)
         working-directory: pipeline
         env:
-          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
-          META_APP_ID:      ${{ secrets.META_APP_ID }}
-          META_APP_SECRET:  ${{ secrets.META_APP_SECRET }}
-          APIFY_TOKEN:      ${{ secrets.APIFY_TOKEN }}
+          SUPABASE_URL:    ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY:    ${{ secrets.SUPABASE_KEY }}
+          META_APP_ID:     ${{ secrets.META_APP_ID }}
+          META_APP_SECRET: ${{ secrets.META_APP_SECRET }}
+          APIFY_TOKEN:     ${{ secrets.APIFY_TOKEN }}
         run: python run_quarterly.py --dry-run
