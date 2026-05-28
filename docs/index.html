@@ -4,434 +4,162 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Banyan — South Asian Organization Directory</title>
-  <meta name="description" content="Discover South Asian American organizations across the United States. Find community groups, advocacy organizations, cultural associations, and service providers.">
+  <meta name="description" content="Discover South Asian American organizations across the United States.">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --green-deep:  #1a4731;
-      --green-mid:   #2d6a4f;
-      --green-light: #52b788;
-      --amber:       #c97d2e;
-      --amber-light: #f0a854;
-      --cream:       #faf8f5;
-      --cream-dark:  #f0ece6;
-      --text-dark:   #1a2633;
-      --text-mid:    #4a5568;
-      --text-soft:   #718096;
-      --border:      #ddd8d0;
-      --white:       #ffffff;
-      --shadow-sm:   0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
-      --shadow-md:   0 4px 12px rgba(0,0,0,.1);
-      --radius:      10px;
+      --green-deep:#1a4731; --green-mid:#2d6a4f; --green-light:#52b788;
+      --amber:#c97d2e; --amber-light:#f0a854;
+      --cream:#faf8f5; --cream-dark:#f0ece6;
+      --text-dark:#1a2633; --text-mid:#4a5568; --text-soft:#718096;
+      --border:#ddd8d0; --white:#ffffff;
+      --shadow-sm:0 1px 3px rgba(0,0,0,.08); --shadow-md:0 4px 12px rgba(0,0,0,.1);
+      --radius:10px;
     }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif; background:var(--cream); color:var(--text-dark); min-height:100vh; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-      background: var(--cream);
-      color: var(--text-dark);
-      min-height: 100vh;
+    /* HEADER */
+    header { background:var(--green-deep); color:white; padding:0 24px; }
+    .header-inner { max-width:1200px; margin:0 auto; padding:18px 0; display:flex; align-items:center; gap:16px; }
+    .logo { display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit; }
+    .logo-icon { width:40px; height:40px; flex-shrink:0; }
+    .logo-text h1 { font-size:1.5rem; font-weight:700; letter-spacing:-.02em; line-height:1; }
+    .logo-text span { font-size:.78rem; opacity:.7; letter-spacing:.03em; text-transform:uppercase; }
+    .header-actions { margin-left:auto; display:flex; gap:10px; align-items:center; }
+    .btn-add-org {
+      display:inline-flex; align-items:center; gap:6px;
+      background:var(--amber); color:white; border:none; border-radius:6px;
+      padding:8px 16px; font-size:.85rem; font-weight:600; cursor:pointer;
+      transition:background .15s;
     }
+    .btn-add-org:hover { background:var(--amber-light); }
 
-    /* ── HEADER ── */
-    header {
-      background: var(--green-deep);
-      color: white;
-      padding: 0 24px;
-    }
-    .header-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px 0 18px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      color: inherit;
-    }
-    .logo-icon {
-      width: 40px;
-      height: 40px;
-      flex-shrink: 0;
-    }
-    .logo-text h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      line-height: 1;
-    }
-    .logo-text span {
-      font-size: 0.78rem;
-      opacity: 0.7;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-    }
-    .header-tagline {
-      margin-left: auto;
-      font-size: 0.85rem;
-      opacity: 0.65;
-      display: none;
-    }
-    @media (min-width: 640px) { .header-tagline { display: block; } }
+    /* FILTER BAR */
+    .filter-bar { background:var(--white); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; box-shadow:0 2px 8px rgba(0,0,0,.06); }
+    .filter-inner { max-width:1200px; margin:0 auto; padding:12px 24px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+    .search-wrap { flex:1; min-width:200px; position:relative; }
+    .search-wrap svg { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--text-soft); pointer-events:none; }
+    input[type="search"] { width:100%; padding:8px 12px 8px 34px; border:1px solid var(--border); border-radius:6px; font-size:.9rem; background:var(--cream); color:var(--text-dark); outline:none; }
+    input[type="search"]:focus { border-color:var(--green-mid); background:white; }
+    select.filter-select { padding:8px 28px 8px 10px; border:1px solid var(--border); border-radius:6px; font-size:.85rem; background:var(--cream); color:var(--text-dark); cursor:pointer; outline:none; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 8px center; }
+    .multi-wrap { position:relative; }
+    .multi-btn { padding:8px 28px 8px 10px; border:1px solid var(--border); border-radius:6px; font-size:.85rem; background:var(--cream); color:var(--text-dark); cursor:pointer; white-space:nowrap; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 8px center; user-select:none; }
+    .multi-btn.active { border-color:var(--green-mid); background-color:white; color:var(--green-deep); font-weight:600; }
+    .multi-dropdown { display:none; position:absolute; top:calc(100% + 4px); left:0; min-width:240px; max-height:300px; background:white; border:1px solid var(--border); border-radius:8px; box-shadow:var(--shadow-md); overflow-y:auto; z-index:200; }
+    .multi-dropdown.open { display:block; }
+    .multi-search { padding:8px; border-bottom:1px solid var(--border); position:sticky; top:0; background:white; }
+    .multi-search input { width:100%; padding:6px 8px; border:1px solid var(--border); border-radius:4px; font-size:.82rem; outline:none; }
+    .multi-option { display:flex; align-items:center; gap:8px; padding:7px 12px; font-size:.85rem; cursor:pointer; user-select:none; }
+    .multi-option:hover { background:var(--cream); }
+    .multi-option.selected { background:#f0f9f4; color:var(--green-deep); }
+    .multi-option input[type="checkbox"] { accent-color:var(--green-mid); }
+    .result-count { margin-left:auto; font-size:.82rem; color:var(--text-soft); white-space:nowrap; }
+    .active-filters { display:flex; flex-wrap:wrap; gap:6px; padding:0 24px 10px; max-width:1200px; margin:0 auto; }
+    .active-filters:empty { display:none; }
+    .chip { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; background:#e8f4ed; color:var(--green-deep); border-radius:20px; font-size:.78rem; font-weight:500; }
+    .chip button { background:none; border:none; cursor:pointer; color:var(--green-mid); padding:0; line-height:1; font-size:14px; }
+    .clear-all { font-size:.78rem; color:var(--text-soft); cursor:pointer; text-decoration:underline; align-self:center; background:none; border:none; }
 
-    /* ── FILTER BAR ── */
-    .filter-bar {
-      background: var(--white);
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 2px 8px rgba(0,0,0,.06);
-    }
-    .filter-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 12px 24px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-    }
-    .search-wrap {
-      flex: 1;
-      min-width: 200px;
-      position: relative;
-    }
-    .search-wrap svg {
-      position: absolute;
-      left: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-soft);
-      pointer-events: none;
-    }
-    input[type="search"] {
-      width: 100%;
-      padding: 8px 12px 8px 34px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 0.9rem;
-      background: var(--cream);
-      color: var(--text-dark);
-      outline: none;
-      transition: border-color .15s;
-    }
-    input[type="search"]:focus { border-color: var(--green-mid); background: white; }
+    /* GRID */
+    main { max-width:1200px; margin:0 auto; padding:24px 24px 48px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:18px; }
 
-    select.filter-select {
-      padding: 8px 28px 8px 10px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 0.85rem;
-      background: var(--cream);
-      color: var(--text-dark);
-      cursor: pointer;
-      outline: none;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 8px center;
-    }
-    select.filter-select:focus { border-color: var(--green-mid); }
+    /* CARD */
+    .card { background:var(--white); border-radius:var(--radius); box-shadow:var(--shadow-sm); display:flex; flex-direction:column; border:1px solid var(--border); transition:box-shadow .15s,transform .15s; }
+    .card:hover { box-shadow:var(--shadow-md); transform:translateY(-2px); }
+    .card-body { padding:18px 18px 14px; flex:1; }
+    .card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; margin-bottom:6px; }
+    .scope-badge { font-size:.68rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em; padding:2px 7px; border-radius:3px; white-space:nowrap; flex-shrink:0; }
+    .scope-National { background:#dbeafe; color:#1e40af; }
+    .scope-Regional { background:#d1fae5; color:#065f46; }
+    .scope-Metropolitan,.scope-Local { background:#fef3c7; color:#92400e; }
+    .year-badge { font-size:.72rem; color:var(--text-soft); }
+    .card-name { font-size:1.02rem; font-weight:700; color:var(--text-dark); line-height:1.3; margin-bottom:4px; }
+    .card-location { display:flex; align-items:center; gap:4px; font-size:.8rem; color:var(--text-soft); margin-bottom:10px; }
+    .card-description { font-size:.84rem; color:var(--text-mid); line-height:1.5; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; margin-bottom:12px; }
+    .tag-row { margin-bottom:8px; }
+    .tag-label { font-size:.7rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--text-soft); margin-bottom:4px; }
+    .tags { display:flex; flex-wrap:wrap; gap:4px; }
+    .tag { font-size:.75rem; padding:2px 8px; border-radius:12px; cursor:pointer; transition:opacity .1s; }
+    .tag:hover { opacity:.75; }
+    .tag-community { background:#ede9fe; color:#5b21b6; }
+    .tag-service { background:#fce7f3; color:#9d174d; }
+    .tag-more { background:var(--cream-dark); color:var(--text-soft); cursor:default; }
+    .card-footer { padding:10px 18px 12px; border-top:1px solid var(--cream-dark); display:flex; align-items:center; gap:10px; }
+    .contact-links { display:flex; gap:8px; align-items:center; flex:1; }
+    .contact-link { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:5px; background:var(--cream); color:var(--text-mid); text-decoration:none; transition:background .1s,color .1s; }
+    .contact-link:hover { background:var(--green-deep); color:white; }
+    .contact-link svg { width:14px; height:14px; }
+    .membership-badge { font-size:.7rem; color:var(--amber); font-weight:600; }
+    .suggest-edit-btn { display:inline-flex; align-items:center; gap:3px; font-size:.72rem; color:var(--text-soft); background:none; border:none; cursor:pointer; padding:3px 6px; border-radius:4px; margin-left:auto; }
+    .suggest-edit-btn:hover { background:var(--cream-dark); color:var(--text-mid); }
+    .empty { grid-column:1/-1; text-align:center; padding:64px 24px; color:var(--text-soft); }
+    .empty h3 { font-size:1.1rem; margin-bottom:8px; color:var(--text-mid); }
+    .loading { grid-column:1/-1; text-align:center; padding:64px; color:var(--text-soft); }
 
-    /* Multi-select dropdown */
-    .multi-wrap {
-      position: relative;
-    }
-    .multi-btn {
-      padding: 8px 28px 8px 10px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 0.85rem;
-      background: var(--cream);
-      color: var(--text-dark);
-      cursor: pointer;
-      white-space: nowrap;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 8px center;
-      user-select: none;
-      border-right-width: 1px;
-    }
-    .multi-btn.active {
-      border-color: var(--green-mid);
-      background-color: white;
-      color: var(--green-deep);
-      font-weight: 600;
-    }
-    .multi-dropdown {
-      display: none;
-      position: absolute;
-      top: calc(100% + 4px);
-      left: 0;
-      min-width: 240px;
-      max-height: 320px;
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      box-shadow: var(--shadow-md);
-      overflow-y: auto;
-      z-index: 200;
-    }
-    .multi-dropdown.open { display: block; }
-    .multi-search {
-      padding: 8px;
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      background: white;
-    }
-    .multi-search input {
-      width: 100%;
-      padding: 6px 8px;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      font-size: 0.82rem;
-      outline: none;
-    }
-    .multi-option {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 7px 12px;
-      font-size: 0.85rem;
-      cursor: pointer;
-      user-select: none;
-    }
-    .multi-option:hover { background: var(--cream); }
-    .multi-option.selected { background: #f0f9f4; color: var(--green-deep); }
-    .multi-option input[type="checkbox"] { accent-color: var(--green-mid); }
+    /* MODAL */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:500; align-items:flex-start; justify-content:center; padding:24px; overflow-y:auto; }
+    .modal-overlay.open { display:flex; }
+    .modal { background:white; border-radius:12px; width:100%; max-width:640px; margin:auto; box-shadow:0 8px 40px rgba(0,0,0,.2); }
+    .modal-header { padding:20px 24px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; }
+    .modal-header h2 { font-size:1.1rem; font-weight:700; flex:1; }
+    .modal-close { background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-soft); line-height:1; padding:4px; }
+    .modal-close:hover { color:var(--text-dark); }
+    .modal-body { padding:24px; }
+    .modal-footer { padding:16px 24px; border-top:1px solid var(--border); display:flex; gap:10px; justify-content:flex-end; }
 
-    .result-count {
-      margin-left: auto;
-      font-size: 0.82rem;
-      color: var(--text-soft);
-      white-space: nowrap;
+    /* FORM */
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .form-grid .full { grid-column:1/-1; }
+    .field { display:flex; flex-direction:column; gap:5px; }
+    .field label { font-size:.8rem; font-weight:600; color:var(--text-mid); }
+    .field label .req { color:var(--amber); }
+    .field input[type="text"],
+    .field input[type="email"],
+    .field input[type="url"],
+    .field input[type="number"],
+    .field select,
+    .field textarea {
+      padding:8px 10px; border:1px solid var(--border); border-radius:6px;
+      font-size:.88rem; font-family:inherit; outline:none; background:var(--cream);
     }
+    .field input:focus,.field select:focus,.field textarea:focus { border-color:var(--green-mid); background:white; }
+    .field textarea { resize:vertical; min-height:80px; }
+    .field .hint { font-size:.72rem; color:var(--text-soft); }
+    .scope-radios { display:flex; flex-direction:column; gap:6px; }
+    .scope-radio { display:flex; align-items:center; gap:8px; font-size:.88rem; cursor:pointer; }
+    .scope-radio input { accent-color:var(--green-mid); }
+    .multi-check-list { border:1px solid var(--border); border-radius:6px; max-height:160px; overflow-y:auto; }
+    .multi-check-item { display:flex; align-items:center; gap:8px; padding:6px 10px; font-size:.84rem; cursor:pointer; }
+    .multi-check-item:hover { background:var(--cream); }
+    .multi-check-item input { accent-color:var(--green-mid); }
+    .multi-check-item.disabled { opacity:.4; pointer-events:none; }
+    .field-search { width:100%; padding:6px 10px; border:1px solid var(--border); border-radius:6px 6px 0 0; font-size:.82rem; outline:none; border-bottom:none; }
+    .selection-count { font-size:.72rem; color:var(--text-soft); margin-top:3px; }
 
-    /* Active filter chips */
-    .active-filters {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      padding: 0 24px 10px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    .active-filters:empty { display: none; }
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 3px 8px;
-      background: #e8f4ed;
-      color: var(--green-deep);
-      border-radius: 20px;
-      font-size: 0.78rem;
-      font-weight: 500;
-    }
-    .chip button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--green-mid);
-      padding: 0;
-      line-height: 1;
-      font-size: 14px;
-    }
-    .clear-all {
-      font-size: 0.78rem;
-      color: var(--text-soft);
-      cursor: pointer;
-      text-decoration: underline;
-      align-self: center;
-      background: none;
-      border: none;
-    }
+    .btn-primary { padding:9px 20px; background:var(--green-deep); color:white; border:none; border-radius:6px; font-size:.9rem; font-weight:600; cursor:pointer; }
+    .btn-primary:hover { background:var(--green-mid); }
+    .btn-primary:disabled { opacity:.5; cursor:not-allowed; }
+    .btn-secondary { padding:9px 20px; background:var(--cream-dark); color:var(--text-mid); border:none; border-radius:6px; font-size:.9rem; cursor:pointer; }
+    .btn-secondary:hover { background:var(--border); }
 
-    /* ── MAIN GRID ── */
-    main {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 24px 24px 48px;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 18px;
-    }
+    .form-section-title { font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text-soft); margin:20px 0 12px; padding-bottom:6px; border-bottom:1px solid var(--cream-dark); }
+    .form-section-title:first-child { margin-top:0; }
 
-    /* ── ORG CARD ── */
-    .card {
-      background: var(--white);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-sm);
-      display: flex;
-      flex-direction: column;
-      border: 1px solid var(--border);
-      transition: box-shadow .15s, transform .15s;
-    }
-    .card:hover {
-      box-shadow: var(--shadow-md);
-      transform: translateY(-2px);
-    }
-    .card-body { padding: 18px 18px 14px; flex: 1; }
-    .card-top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 6px;
-    }
-    .scope-badge {
-      font-size: 0.68rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      padding: 2px 7px;
-      border-radius: 3px;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-    .scope-National     { background: #dbeafe; color: #1e40af; }
-    .scope-Regional     { background: #d1fae5; color: #065f46; }
-    .scope-Metropolitan { background: #fef3c7; color: #92400e; }
-    .scope-Local        { background: #fef3c7; color: #92400e; }
+    .toast { position:fixed; bottom:24px; right:24px; background:var(--green-deep); color:white; padding:12px 20px; border-radius:8px; font-size:.88rem; font-weight:500; box-shadow:var(--shadow-md); transform:translateY(80px); opacity:0; transition:transform .3s,opacity .3s; z-index:600; max-width:340px; }
+    .toast.show { transform:translateY(0); opacity:1; }
+    .toast.error { background:#dc2626; }
 
-    .year-badge {
-      font-size: 0.72rem;
-      color: var(--text-soft);
-    }
+    footer { text-align:center; padding:24px; font-size:.8rem; color:var(--text-soft); border-top:1px solid var(--border); }
+    footer a { color:var(--green-mid); text-decoration:none; }
 
-    .card-name {
-      font-size: 1.02rem;
-      font-weight: 700;
-      color: var(--text-dark);
-      line-height: 1.3;
-      margin-bottom: 4px;
-    }
-    .card-location {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 0.8rem;
-      color: var(--text-soft);
-      margin-bottom: 10px;
-    }
-    .card-description {
-      font-size: 0.84rem;
-      color: var(--text-mid);
-      line-height: 1.5;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      margin-bottom: 12px;
-    }
-
-    .tag-row {
-      margin-bottom: 8px;
-    }
-    .tag-label {
-      font-size: 0.7rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-soft);
-      margin-bottom: 4px;
-    }
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-    }
-    .tag {
-      font-size: 0.75rem;
-      padding: 2px 8px;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: opacity .1s;
-    }
-    .tag:hover { opacity: 0.75; }
-    .tag-community { background: #ede9fe; color: #5b21b6; }
-    .tag-service   { background: #fce7f3; color: #9d174d; }
-    .tag-more      { background: var(--cream-dark); color: var(--text-soft); cursor: default; }
-
-    /* ── CARD FOOTER ── */
-    .card-footer {
-      padding: 10px 18px 12px;
-      border-top: 1px solid var(--cream-dark);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .contact-links {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex: 1;
-    }
-    .contact-link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 28px;
-      height: 28px;
-      border-radius: 5px;
-      background: var(--cream);
-      color: var(--text-mid);
-      text-decoration: none;
-      transition: background .1s, color .1s;
-    }
-    .contact-link:hover { background: var(--green-deep); color: white; }
-    .contact-link svg { width: 14px; height: 14px; }
-
-    .membership-badge {
-      font-size: 0.7rem;
-      color: var(--amber);
-      font-weight: 600;
-      margin-left: auto;
-    }
-
-    /* ── EMPTY STATE ── */
-    .empty {
-      grid-column: 1 / -1;
-      text-align: center;
-      padding: 64px 24px;
-      color: var(--text-soft);
-    }
-    .empty h3 { font-size: 1.1rem; margin-bottom: 8px; color: var(--text-mid); }
-    .empty p  { font-size: 0.9rem; }
-
-    /* ── LOADING ── */
-    .loading {
-      grid-column: 1 / -1;
-      text-align: center;
-      padding: 64px;
-      color: var(--text-soft);
-    }
-
-    /* ── FOOTER ── */
-    footer {
-      text-align: center;
-      padding: 24px;
-      font-size: 0.8rem;
-      color: var(--text-soft);
-      border-top: 1px solid var(--border);
-    }
-    footer a { color: var(--green-mid); text-decoration: none; }
-
-    /* ── RESPONSIVE ── */
-    @media (max-width: 600px) {
-      .filter-inner { padding: 10px 16px; }
-      main { padding: 16px 16px 40px; }
-      .grid { grid-template-columns: 1fr; gap: 12px; }
-      .result-count { display: none; }
+    @media (max-width:600px) {
+      .filter-inner { padding:10px 16px; }
+      main { padding:16px 16px 40px; }
+      .grid { grid-template-columns:1fr; gap:12px; }
+      .result-count { display:none; }
+      .form-grid { grid-template-columns:1fr; }
+      .form-grid .full { grid-column:1; }
     }
   </style>
 </head>
@@ -441,24 +169,27 @@
   <div class="header-inner">
     <a class="logo" href="#">
       <svg class="logo-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Banyan tree silhouette -->
-        <circle cx="20" cy="14" r="9" fill="#52b788" opacity="0.9"/>
-        <circle cx="10" cy="16" r="6" fill="#52b788" opacity="0.75"/>
-        <circle cx="30" cy="16" r="6" fill="#52b788" opacity="0.75"/>
-        <circle cx="14" cy="22" r="5" fill="#40916c" opacity="0.7"/>
-        <circle cx="26" cy="22" r="5" fill="#40916c" opacity="0.7"/>
+        <circle cx="20" cy="14" r="9" fill="#52b788" opacity=".9"/>
+        <circle cx="10" cy="16" r="6" fill="#52b788" opacity=".75"/>
+        <circle cx="30" cy="16" r="6" fill="#52b788" opacity=".75"/>
+        <circle cx="14" cy="22" r="5" fill="#40916c" opacity=".7"/>
+        <circle cx="26" cy="22" r="5" fill="#40916c" opacity=".7"/>
         <rect x="19" y="18" width="2" height="12" rx="1" fill="#c97d2e"/>
-        <rect x="10" y="28" width="20" height="2" rx="1" fill="#c97d2e" opacity="0.7"/>
-        <!-- Aerial roots -->
-        <rect x="12" y="22" width="1.5" height="8" rx="0.75" fill="#c97d2e" opacity="0.6"/>
-        <rect x="26.5" y="22" width="1.5" height="8" rx="0.75" fill="#c97d2e" opacity="0.6"/>
+        <rect x="10" y="28" width="20" height="2" rx="1" fill="#c97d2e" opacity=".7"/>
+        <rect x="12" y="22" width="1.5" height="8" rx=".75" fill="#c97d2e" opacity=".6"/>
+        <rect x="26.5" y="22" width="1.5" height="8" rx=".75" fill="#c97d2e" opacity=".6"/>
       </svg>
       <div class="logo-text">
         <h1>Banyan</h1>
         <span>South Asian Organization Directory</span>
       </div>
     </a>
-    <p class="header-tagline">Connecting the diaspora · United States</p>
+    <div class="header-actions">
+      <button class="btn-add-org" id="btn-add-org">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add an Organization
+      </button>
+    </div>
   </div>
 </header>
 
@@ -468,123 +199,324 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <input type="search" id="search" placeholder="Search organizations…" autocomplete="off">
     </div>
-
-    <select class="filter-select" id="filter-state">
-      <option value="">All states</option>
-    </select>
-
+    <select class="filter-select" id="filter-state"><option value="">All states</option></select>
     <div class="multi-wrap">
-      <div class="multi-btn" id="btn-communities" tabindex="0">Communities ▾</div>
+      <div class="multi-btn" id="btn-communities">Communities ▾</div>
       <div class="multi-dropdown" id="dd-communities">
         <div class="multi-search"><input type="text" placeholder="Search communities…" id="search-communities"></div>
         <div id="list-communities"></div>
       </div>
     </div>
-
     <div class="multi-wrap">
-      <div class="multi-btn" id="btn-services" tabindex="0">Services ▾</div>
+      <div class="multi-btn" id="btn-services">Services ▾</div>
       <div class="multi-dropdown" id="dd-services">
         <div class="multi-search"><input type="text" placeholder="Search services…" id="search-services"></div>
         <div id="list-services"></div>
       </div>
     </div>
-
     <span class="result-count" id="result-count"></span>
   </div>
   <div class="active-filters" id="active-filters"></div>
 </div>
 
 <main>
-  <div class="grid" id="grid">
-    <div class="loading">Loading organizations…</div>
-  </div>
+  <div class="grid" id="grid"><div class="loading">Loading organizations…</div></div>
 </main>
 
 <footer>
-  <p>
-    Banyan is a community resource — data sourced from public records and organizational websites.
-    Know of an org that's missing? <a href="mailto:dm1973@gmail.com">Let us know.</a>
+  <p>Banyan is a community resource. Know of an org that's missing?
+     <button class="btn-add-org" onclick="document.getElementById('modal-add').classList.add('open')" style="display:inline;background:none;color:var(--green-mid);border:none;cursor:pointer;font-size:.8rem;text-decoration:underline;padding:0">Add it here.</button>
   </p>
 </footer>
 
-<script>
-// ── State ─────────────────────────────────────────────────────
-let allOrgs = [];
-let filters = {
-  search: "",
-  state: "",
-  communities: new Set(),
-  services: new Set(),
-};
+<!-- ── ADD ORG MODAL ─────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-add">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Add an Organization</h2>
+      <button class="modal-close" data-close="modal-add">×</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-add" novalidate>
+        <p class="form-section-title">Organization Details</p>
+        <div class="form-grid">
+          <div class="field full">
+            <label>Organization Name <span class="req">*</span></label>
+            <input type="text" name="name" required placeholder="Full legal name">
+          </div>
+          <div class="field full">
+            <label>Description</label>
+            <textarea name="description" placeholder="Brief mission statement or description (2–4 sentences)"></textarea>
+          </div>
+          <div class="field">
+            <label>Website</label>
+            <input type="url" name="website_url" placeholder="https://…">
+          </div>
+          <div class="field">
+            <label>Email</label>
+            <input type="email" name="email" placeholder="contact@org.org">
+          </div>
+          <div class="field">
+            <label>Facebook URL</label>
+            <input type="url" name="facebook_url" placeholder="https://facebook.com/…">
+          </div>
+          <div class="field">
+            <label>Instagram URL</label>
+            <input type="url" name="instagram_url" placeholder="https://instagram.com/…">
+          </div>
+          <div class="field">
+            <label>X / Twitter URL</label>
+            <input type="url" name="twitter_url" placeholder="https://x.com/…">
+          </div>
+          <div class="field">
+            <label>Year Founded</label>
+            <input type="number" name="year_founded" placeholder="e.g. 2005" min="1800" max="2030">
+          </div>
+          <div class="field">
+            <label>Primary Contact</label>
+            <input type="text" name="primary_contact" placeholder="Name or title">
+          </div>
+          <div class="field">
+            <label>Has Membership Program?</label>
+            <select name="has_membership">
+              <option value="">Unknown</option>
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
+          </div>
+        </div>
 
-// ── Data loading ──────────────────────────────────────────────
+        <p class="form-section-title">Location &amp; Scope</p>
+        <div class="form-grid">
+          <div class="field">
+            <label>State <span class="req">*</span></label>
+            <select name="state" id="add-state" required>
+              <option value="">Select state…</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Service Area</label>
+            <input type="text" name="service_area" placeholder="e.g. Greater New York Area">
+          </div>
+          <div class="field full">
+            <label>Scope of Service <span class="req">*</span></label>
+            <div class="scope-radios">
+              <label class="scope-radio"><input type="radio" name="scope_of_service" value="National" required> National</label>
+              <label class="scope-radio"><input type="radio" name="scope_of_service" value="Regional / State"> Regional / State</label>
+              <label class="scope-radio"><input type="radio" name="scope_of_service" value="Metropolitan / Local"> Metropolitan / Local</label>
+            </div>
+          </div>
+        </div>
+
+        <p class="form-section-title">Communities Served</p>
+        <div class="field full" id="add-communities-wrap">
+          <input class="field-search" type="text" placeholder="Filter communities…" id="add-comm-search">
+          <div class="multi-check-list" id="add-comm-list"></div>
+          <span class="hint">Select all that apply</span>
+        </div>
+
+        <p class="form-section-title">Services Provided</p>
+        <div class="field full" id="add-services-wrap">
+          <input class="field-search" type="text" placeholder="Filter services…" id="add-svc-search">
+          <div class="multi-check-list" id="add-svc-list"></div>
+          <span class="selection-count" id="add-svc-count">Select up to 3 primary services</span>
+        </div>
+
+        <p class="form-section-title">Your Information</p>
+        <div class="form-grid">
+          <div class="field">
+            <label>Your Name <span class="req">*</span></label>
+            <input type="text" name="submitter_name" required placeholder="How should we credit you?">
+          </div>
+          <div class="field">
+            <label>Your Email <span class="req">*</span></label>
+            <input type="email" name="submitter_email" required placeholder="For follow-up if needed">
+          </div>
+          <div class="field full">
+            <label>Additional Notes</label>
+            <textarea name="submitter_notes" placeholder="Anything else we should know about this organization?"></textarea>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" data-close="modal-add">Cancel</button>
+      <button class="btn-primary" id="submit-add">Submit Organization</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── SUGGEST EDIT MODAL ─────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Suggest a Correction</h2>
+      <button class="modal-close" data-close="modal-edit">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.85rem;color:var(--text-mid);margin-bottom:16px">
+        Editing: <strong id="edit-org-name-display">—</strong><br>
+        <span style="font-size:.78rem;color:var(--text-soft)">Fill in or correct only the fields that need updating. Leave others blank.</span>
+      </p>
+      <form id="form-edit" novalidate>
+        <input type="hidden" name="org_id">
+        <input type="hidden" name="existing_org_name">
+        <div class="form-grid">
+          <div class="field full">
+            <label>Description</label>
+            <textarea name="description" placeholder="Updated description…"></textarea>
+          </div>
+          <div class="field">
+            <label>Website</label>
+            <input type="url" name="website_url">
+          </div>
+          <div class="field">
+            <label>Email</label>
+            <input type="email" name="email">
+          </div>
+          <div class="field">
+            <label>Facebook URL</label>
+            <input type="url" name="facebook_url">
+          </div>
+          <div class="field">
+            <label>Instagram URL</label>
+            <input type="url" name="instagram_url">
+          </div>
+          <div class="field">
+            <label>X / Twitter URL</label>
+            <input type="url" name="twitter_url">
+          </div>
+          <div class="field">
+            <label>Year Founded</label>
+            <input type="number" name="year_founded" min="1800" max="2030">
+          </div>
+          <div class="field">
+            <label>Primary Contact</label>
+            <input type="text" name="primary_contact">
+          </div>
+          <div class="field">
+            <label>State</label>
+            <select name="state" id="edit-state">
+              <option value="">Unchanged</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Service Area</label>
+            <input type="text" name="service_area">
+          </div>
+          <div class="field full">
+            <label>Scope of Service</label>
+            <div class="scope-radios">
+              <label class="scope-radio"><input type="radio" name="scope_of_service" value=""> Unchanged</label>
+              <label class="scope-radio"><input type="radio" name="scope_of_service" value="National"> National</label>
+              <label class="scope-radio"><input type="radio" name="scope_of_service" value="Regional / State"> Regional / State</label>
+              <label class="scope-radio"><input type="radio" name="scope_of_service" value="Metropolitan / Local"> Metropolitan / Local</label>
+            </div>
+          </div>
+        </div>
+
+        <p class="form-section-title">Communities Served (replace current list)</p>
+        <div class="field full">
+          <input class="field-search" type="text" placeholder="Filter communities…" id="edit-comm-search">
+          <div class="multi-check-list" id="edit-comm-list"></div>
+          <span class="hint">Leave all unchecked to keep existing communities</span>
+        </div>
+
+        <p class="form-section-title">Services (replace current list, up to 3)</p>
+        <div class="field full">
+          <input class="field-search" type="text" placeholder="Filter services…" id="edit-svc-search">
+          <div class="multi-check-list" id="edit-svc-list"></div>
+          <span class="selection-count" id="edit-svc-count">Leave all unchecked to keep existing services</span>
+        </div>
+
+        <p class="form-section-title">Your Information</p>
+        <div class="form-grid">
+          <div class="field">
+            <label>Your Name <span class="req">*</span></label>
+            <input type="text" name="submitter_name" required>
+          </div>
+          <div class="field">
+            <label>Your Email <span class="req">*</span></label>
+            <input type="email" name="submitter_email" required>
+          </div>
+          <div class="field full">
+            <label>What are you correcting? <span class="req">*</span></label>
+            <textarea name="submitter_notes" required placeholder="e.g. The website URL changed, the description is outdated…"></textarea>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" data-close="modal-edit">Cancel</button>
+      <button class="btn-primary" id="submit-edit">Submit Correction</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Config & globals ──────────────────────────────────────────
+let SB_URL = "", SB_ANON = "";
+let allOrgs = [], metaData = {};
+let filters = { search:"", state:"", communities:new Set(), services:new Set() };
+
+const US_STATES = ["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY","DC"];
+
+// ── Load ──────────────────────────────────────────────────────
 async function loadData() {
   try {
-    const [orgsRes, metaRes] = await Promise.all([
+    const [cfgRes, orgsRes, metaRes] = await Promise.all([
+      fetch("./data/config.json"),
       fetch("./data/orgs.json"),
       fetch("./data/meta.json"),
     ]);
-    allOrgs = await orgsRes.json();
-    const meta = await metaRes.json();
-    initFilters(meta);
+    const cfg = await cfgRes.json();
+    SB_URL  = cfg.supabase_url  || "";
+    SB_ANON = cfg.supabase_anon_key || "";
+    allOrgs  = await orgsRes.json();
+    metaData = await metaRes.json();
+    initFilters(metaData);
+    initForms(metaData);
     render();
-  } catch (e) {
+  } catch(e) {
     document.getElementById("grid").innerHTML =
       `<div class="empty"><h3>Unable to load data</h3><p>${e.message}</p></div>`;
   }
 }
 
-// ── Filter initialization ─────────────────────────────────────
+// ── Filter init ───────────────────────────────────────────────
 function initFilters(meta) {
-  // State dropdown
   const stateEl = document.getElementById("filter-state");
-  meta.states.forEach(s => {
-    const opt = document.createElement("option");
-    opt.value = s;
-    opt.textContent = s;
-    stateEl.appendChild(opt);
+  (meta.states || []).forEach(s => {
+    const o = document.createElement("option"); o.value = o.textContent = s; stateEl.appendChild(o);
   });
-
-  // Multi-selects
-  buildMulti("communities", meta.communities, "tag-community");
-  buildMulti("services", meta.services, "tag-service");
+  buildMulti("communities", meta.communities || [], "tag-community");
+  buildMulti("services",    meta.services    || [], "tag-service");
 }
 
-function buildMulti(key, items, tagClass) {
+function buildMulti(key, items, cls) {
   const list = document.getElementById(`list-${key}`);
   items.forEach(item => {
     const div = document.createElement("div");
-    div.className = "multi-option";
-    div.dataset.value = item;
+    div.className = "multi-option"; div.dataset.value = item;
     div.innerHTML = `<input type="checkbox"><span>${item}</span>`;
     div.addEventListener("click", () => toggleMulti(key, item, div));
     list.appendChild(div);
   });
-
-  // Search within dropdown
   document.getElementById(`search-${key}`).addEventListener("input", e => {
     const q = e.target.value.toLowerCase();
-    list.querySelectorAll(".multi-option").forEach(opt => {
-      opt.style.display = opt.dataset.value.toLowerCase().includes(q) ? "" : "none";
+    list.querySelectorAll(".multi-option").forEach(o => {
+      o.style.display = o.dataset.value.toLowerCase().includes(q) ? "" : "none";
     });
   });
 }
 
 function toggleMulti(key, value, el) {
-  const set = filters[key];
-  const cb = el.querySelector("input");
-  if (set.has(value)) {
-    set.delete(value);
-    el.classList.remove("selected");
-    cb.checked = false;
-  } else {
-    set.add(value);
-    el.classList.add("selected");
-    cb.checked = true;
-  }
-  updateBtn(key);
-  renderActiveFilters();
-  render();
+  const set = filters[key], cb = el.querySelector("input");
+  if (set.has(value)) { set.delete(value); el.classList.remove("selected"); cb.checked = false; }
+  else                { set.add(value);    el.classList.add("selected");    cb.checked = true; }
+  updateBtn(key); renderActiveFilters(); render();
 }
 
 function updateBtn(key) {
@@ -595,231 +527,286 @@ function updateBtn(key) {
   btn.classList.toggle("active", count > 0);
 }
 
-// ── Dropdown open/close ───────────────────────────────────────
-["communities", "services"].forEach(key => {
+["communities","services"].forEach(key => {
   const btn = document.getElementById(`btn-${key}`);
   const dd  = document.getElementById(`dd-${key}`);
-  btn.addEventListener("click", e => {
-    e.stopPropagation();
-    const isOpen = dd.classList.contains("open");
-    closeAllDropdowns();
-    if (!isOpen) dd.classList.add("open");
-  });
+  btn.addEventListener("click", e => { e.stopPropagation(); const open = dd.classList.contains("open"); closeAllDD(); if (!open) dd.classList.add("open"); });
 });
-document.addEventListener("click", closeAllDropdowns);
-document.addEventListener("keydown", e => { if (e.key === "Escape") closeAllDropdowns(); });
-function closeAllDropdowns() {
-  document.querySelectorAll(".multi-dropdown.open").forEach(d => d.classList.remove("open"));
-}
+document.addEventListener("click", closeAllDD);
+document.addEventListener("keydown", e => { if (e.key === "Escape") { closeAllDD(); closeModals(); } });
+function closeAllDD() { document.querySelectorAll(".multi-dropdown.open").forEach(d => d.classList.remove("open")); }
 
-// ── Active filter chips ───────────────────────────────────────
 function renderActiveFilters() {
-  const container = document.getElementById("active-filters");
-  container.innerHTML = "";
+  const c = document.getElementById("active-filters"); c.innerHTML = "";
   const chips = [];
-
-  if (filters.state) {
-    chips.push(createChip(`State: ${filters.state}`, () => {
-      filters.state = "";
-      document.getElementById("filter-state").value = "";
-      renderActiveFilters(); render();
-    }));
-  }
-  filters.communities.forEach(c => {
-    chips.push(createChip(c, () => {
-      const el = document.querySelector(`#list-communities [data-value="${CSS.escape(c)}"]`);
-      if (el) toggleMulti("communities", c, el);
-    }));
-  });
-  filters.services.forEach(s => {
-    chips.push(createChip(s, () => {
-      const el = document.querySelector(`#list-services [data-value="${CSS.escape(s)}"]`);
-      if (el) toggleMulti("services", s, el);
-    }));
-  });
-
-  if (chips.length > 1) {
-    const clearBtn = document.createElement("button");
-    clearBtn.className = "clear-all";
-    clearBtn.textContent = "Clear all";
-    clearBtn.addEventListener("click", clearAllFilters);
-    chips.push(clearBtn);
-  }
-
-  chips.forEach(c => container.appendChild(c));
+  if (filters.state) chips.push(makeChip(`State: ${filters.state}`, () => { filters.state=""; document.getElementById("filter-state").value=""; renderActiveFilters(); render(); }));
+  filters.communities.forEach(v => chips.push(makeChip(v, () => { const el=document.querySelector(`#list-communities [data-value="${CSS.escape(v)}"]`); if(el) toggleMulti("communities",v,el); })));
+  filters.services.forEach(v    => chips.push(makeChip(v, () => { const el=document.querySelector(`#list-services [data-value="${CSS.escape(v)}"]`);    if(el) toggleMulti("services",v,el); })));
+  if (chips.length > 1) { const b=document.createElement("button"); b.className="clear-all"; b.textContent="Clear all"; b.addEventListener("click",clearAll); chips.push(b); }
+  chips.forEach(c2 => c.appendChild(c2));
+}
+function makeChip(label, onRemove) {
+  const d=document.createElement("div"); d.className="chip";
+  d.innerHTML=`<span>${label}</span><button>×</button>`;
+  d.querySelector("button").addEventListener("click", onRemove); return d;
+}
+function clearAll() {
+  filters.search=""; filters.state=""; filters.communities.clear(); filters.services.clear();
+  document.getElementById("search").value=""; document.getElementById("filter-state").value="";
+  document.querySelectorAll(".multi-option.selected").forEach(el => { el.classList.remove("selected"); el.querySelector("input").checked=false; });
+  updateBtn("communities"); updateBtn("services"); renderActiveFilters(); render();
 }
 
-function createChip(label, onRemove) {
-  const div = document.createElement("div");
-  div.className = "chip";
-  div.innerHTML = `<span>${label}</span><button title="Remove">×</button>`;
-  div.querySelector("button").addEventListener("click", onRemove);
-  return div;
-}
-
-function clearAllFilters() {
-  filters.search = "";
-  filters.state = "";
-  filters.communities.clear();
-  filters.services.clear();
-  document.getElementById("search").value = "";
-  document.getElementById("filter-state").value = "";
-  document.querySelectorAll(".multi-option.selected").forEach(el => {
-    el.classList.remove("selected");
-    el.querySelector("input").checked = false;
-  });
-  updateBtn("communities");
-  updateBtn("services");
-  renderActiveFilters();
-  render();
-}
-
-// ── Filter logic ──────────────────────────────────────────────
+// ── Filter & render ───────────────────────────────────────────
 function matchesFilters(org) {
-  if (filters.search) {
-    const q = filters.search.toLowerCase();
-    const haystack = [org.name, org.description, org.service_area].filter(Boolean).join(" ").toLowerCase();
-    if (!haystack.includes(q)) return false;
-  }
+  if (filters.search) { const q=filters.search.toLowerCase(); if (!([org.name,org.description,org.service_area].filter(Boolean).join(" ").toLowerCase().includes(q))) return false; }
   if (filters.state && org.state !== filters.state) return false;
-  if (filters.communities.size) {
-    const orgComm = new Set(org.communities_served || []);
-    if (![...filters.communities].some(c => orgComm.has(c))) return false;
-  }
-  if (filters.services.size) {
-    const orgSvc = new Set(org.services || []);
-    if (![...filters.services].some(s => orgSvc.has(s))) return false;
-  }
+  if (filters.communities.size && ![...filters.communities].some(c => (org.communities_served||[]).includes(c))) return false;
+  if (filters.services.size    && ![...filters.services].some(s    => (org.services||[]).includes(s)))           return false;
   return true;
 }
 
-// ── Render ────────────────────────────────────────────────────
 function render() {
   const grid = document.getElementById("grid");
   const visible = allOrgs.filter(matchesFilters);
-  document.getElementById("result-count").textContent =
-    `${visible.length} of ${allOrgs.length} organizations`;
-
-  if (!visible.length) {
-    grid.innerHTML = `<div class="empty">
-      <h3>No organizations found</h3>
-      <p>Try adjusting your filters or search term.</p>
-    </div>`;
-    return;
-  }
-
+  document.getElementById("result-count").textContent = `${visible.length} of ${allOrgs.length} organizations`;
+  if (!visible.length) { grid.innerHTML=`<div class="empty"><h3>No organizations found</h3><p>Try adjusting your filters.</p></div>`; return; }
   grid.innerHTML = "";
   visible.forEach(org => grid.appendChild(buildCard(org)));
 }
 
 function buildCard(org) {
-  const card = document.createElement("div");
-  card.className = "card";
-
-  const scopeKey = (org.scope_of_service || "").replace(/\s*\/.*/, "").replace(/\s+/g, "");
-  const scopeHTML = org.scope_of_service
-    ? `<span class="scope-badge scope-${scopeKey}">${org.scope_of_service}</span>`
-    : "";
-  const yearHTML = org.year_founded
-    ? `<span class="year-badge">Est. ${org.year_founded}</span>`
-    : "";
-
+  const card = document.createElement("div"); card.className = "card";
+  const scopeKey = (org.scope_of_service||"").replace(/\s*\/.*/, "").replace(/\s+/g,"");
+  const scopeHTML = org.scope_of_service ? `<span class="scope-badge scope-${scopeKey}">${org.scope_of_service}</span>` : "";
+  const yearHTML  = org.year_founded ? `<span class="year-badge">Est. ${org.year_founded}</span>` : "";
   const loc = [org.service_area, org.state].filter(Boolean).join(", ");
-  const locHTML = loc
-    ? `<div class="card-location"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>${escHtml(loc)}</div>`
-    : "";
-
-  const descHTML = org.description
-    ? `<p class="card-description">${escHtml(org.description)}</p>`
-    : "";
-
-  const communities = org.communities_served || [];
-  const commHTML = communities.length ? buildTagRow("Communities", communities, "tag-community", "communities") : "";
-
-  const services = org.services || [];
-  const svcHTML = services.length ? buildTagRow("Services", services, "tag-service", "services") : "";
-
-  // Contact links
+  const locHTML = loc ? `<div class="card-location"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>${esc(loc)}</div>` : "";
+  const descHTML = org.description ? `<p class="card-description">${esc(org.description)}</p>` : "";
+  const commHTML = (org.communities_served||[]).length ? buildTagRow("Communities", org.communities_served, "tag-community","communities") : "";
+  const svcHTML  = (org.services||[]).length          ? buildTagRow("Services",    org.services,            "tag-service","services")    : "";
   const links = [];
-  if (org.website_url)  links.push(link(org.website_url, icons.web, "Website"));
-  if (org.email)        links.push(link(`mailto:${org.email}`, icons.email, "Email"));
-  if (org.facebook_url) links.push(link(org.facebook_url, icons.facebook, "Facebook"));
-  if (org.instagram_url)links.push(link(org.instagram_url, icons.instagram, "Instagram"));
-  if (org.twitter_url)  links.push(link(org.twitter_url, icons.twitter, "X / Twitter"));
-
-  const memberHTML = org.has_membership
-    ? `<span class="membership-badge">Members</span>` : "";
+  if (org.website_url)   links.push(lnk(org.website_url,   icons.web,   "Website"));
+  if (org.email)         links.push(lnk(`mailto:${org.email}`, icons.email, "Email"));
+  if (org.facebook_url)  links.push(lnk(org.facebook_url,  icons.fb,    "Facebook"));
+  if (org.instagram_url) links.push(lnk(org.instagram_url, icons.ig,    "Instagram"));
+  if (org.twitter_url)   links.push(lnk(org.twitter_url,   icons.tw,    "X/Twitter"));
+  const memberHTML = org.has_membership ? `<span class="membership-badge">Members</span>` : "";
 
   card.innerHTML = `
     <div class="card-body">
       <div class="card-top">${scopeHTML}${yearHTML}</div>
-      <div class="card-name">${escHtml(org.name)}</div>
-      ${locHTML}
-      ${descHTML}
-      ${commHTML}
-      ${svcHTML}
+      <div class="card-name">${esc(org.name)}</div>
+      ${locHTML}${descHTML}${commHTML}${svcHTML}
     </div>
     <div class="card-footer">
       <div class="contact-links">${links.join("")}</div>
       ${memberHTML}
-    </div>
-  `;
+      <button class="suggest-edit-btn" data-id="${org.id}" data-name="${esc(org.name)}">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Suggest edit
+      </button>
+    </div>`;
   return card;
 }
 
-function buildTagRow(label, items, cls, filterKey) {
-  const max = 4;
-  const shown = items.slice(0, max);
-  const extra = items.length - max;
-  const tags = shown.map(t =>
-    `<span class="tag ${cls}" data-filter="${filterKey}" data-value="${escHtml(t)}">${escHtml(t)}</span>`
-  ).join("");
-  const more = extra > 0 ? `<span class="tag tag-more">+${extra}</span>` : "";
-  return `<div class="tag-row">
-    <div class="tag-label">${label}</div>
-    <div class="tags">${tags}${more}</div>
-  </div>`;
+function buildTagRow(label, items, cls, fk) {
+  const max=4, shown=items.slice(0,max), extra=items.length-max;
+  return `<div class="tag-row"><div class="tag-label">${label}</div><div class="tags">
+    ${shown.map(t=>`<span class="tag ${cls}" data-filter="${fk}" data-value="${esc(t)}">${esc(t)}</span>`).join("")}
+    ${extra>0?`<span class="tag tag-more">+${extra}</span>`:""}
+  </div></div>`;
 }
-
-function link(href, svgIcon, title) {
-  return `<a class="contact-link" href="${escHtml(href)}" target="_blank" rel="noopener" title="${title}">${svgIcon}</a>`;
-}
-
-function escHtml(s) {
-  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-}
-
+function lnk(href, icon, title) { return `<a class="contact-link" href="${esc(href)}" target="_blank" rel="noopener" title="${title}">${icon}</a>`; }
+function esc(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 const icons = {
-  web: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+  web:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
   email: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`,
-  facebook: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>`,
-  instagram: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>`,
-  twitter: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`,
+  fb:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>`,
+  ig:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>`,
+  tw:    `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`,
 };
 
 // ── Click tag to filter ───────────────────────────────────────
 document.getElementById("grid").addEventListener("click", e => {
   const tag = e.target.closest(".tag[data-filter]");
-  if (!tag) return;
-  const key   = tag.dataset.filter;
-  const value = tag.dataset.value;
-  const el = document.querySelector(`#list-${key} [data-value="${CSS.escape(value)}"]`);
-  if (el && !filters[key].has(value)) toggleMulti(key, value, el);
+  if (tag) { const key=tag.dataset.filter, val=tag.dataset.value, el=document.querySelector(`#list-${key} [data-value="${CSS.escape(val)}"]`); if(el && !filters[key].has(val)) toggleMulti(key,val,el); return; }
+  const btn = e.target.closest(".suggest-edit-btn");
+  if (btn) openEditModal(btn.dataset.id, btn.dataset.name);
 });
 
-// ── Event wiring ──────────────────────────────────────────────
-document.getElementById("search").addEventListener("input", e => {
-  filters.search = e.target.value.trim();
-  render();
+document.getElementById("search").addEventListener("input", e => { filters.search=e.target.value.trim(); render(); });
+document.getElementById("filter-state").addEventListener("change", e => { filters.state=e.target.value; renderActiveFilters(); render(); });
+
+// ── Form initialization ───────────────────────────────────────
+function initForms(meta) {
+  // Populate state selects
+  ["add-state","edit-state"].forEach(id => {
+    const sel = document.getElementById(id);
+    US_STATES.forEach(s => { const o=document.createElement("option"); o.value=o.textContent=s; sel.appendChild(o); });
+  });
+
+  // Communities checkboxes (add form)
+  buildCheckList("add-comm-list", "add-comm-search", meta.communities||[], null, null);
+  // Services checkboxes (add form, max 3)
+  buildCheckList("add-svc-list", "add-svc-search", meta.services||[], 3, "add-svc-count");
+  // Communities (edit form)
+  buildCheckList("edit-comm-list", "edit-comm-search", meta.communities||[], null, null);
+  // Services (edit form, max 3)
+  buildCheckList("edit-svc-list", "edit-svc-search", meta.services||[], 3, "edit-svc-count");
+}
+
+function buildCheckList(listId, searchId, items, maxSelect, countId) {
+  const list = document.getElementById(listId);
+  items.forEach(item => {
+    const label = document.createElement("label");
+    label.className = "multi-check-item";
+    label.innerHTML = `<input type="checkbox" value="${esc(item)}"><span>${esc(item)}</span>`;
+    const cb = label.querySelector("input");
+    cb.addEventListener("change", () => enforceMax(listId, maxSelect, countId));
+    list.appendChild(label);
+  });
+  if (searchId) {
+    document.getElementById(searchId).addEventListener("input", e => {
+      const q = e.target.value.toLowerCase();
+      list.querySelectorAll(".multi-check-item").forEach(el => {
+        el.style.display = el.querySelector("span").textContent.toLowerCase().includes(q) ? "" : "none";
+      });
+    });
+  }
+}
+
+function enforceMax(listId, max, countId) {
+  if (!max) return;
+  const list = document.getElementById(listId);
+  const checked = [...list.querySelectorAll("input:checked")];
+  if (countId) document.getElementById(countId).textContent = `${checked.length} of ${max} selected`;
+  list.querySelectorAll(".multi-check-item").forEach(el => {
+    const cb = el.querySelector("input");
+    el.classList.toggle("disabled", !cb.checked && checked.length >= max);
+    cb.disabled = !cb.checked && checked.length >= max;
+  });
+}
+
+function getChecked(listId) {
+  return [...document.getElementById(listId).querySelectorAll("input:checked")].map(cb => cb.value);
+}
+
+function resetCheckList(listId) {
+  document.getElementById(listId).querySelectorAll("input").forEach(cb => {
+    cb.checked = false; cb.disabled = false;
+    cb.closest(".multi-check-item").classList.remove("disabled");
+  });
+}
+
+// ── Modal open/close ──────────────────────────────────────────
+document.getElementById("btn-add-org").addEventListener("click", () => {
+  document.getElementById("form-add").reset();
+  resetCheckList("add-comm-list"); resetCheckList("add-svc-list");
+  document.getElementById("modal-add").classList.add("open");
+});
+document.querySelectorAll("[data-close]").forEach(btn => {
+  btn.addEventListener("click", () => document.getElementById(btn.dataset.close).classList.remove("open"));
+});
+document.querySelectorAll(".modal-overlay").forEach(o => {
+  o.addEventListener("click", e => { if (e.target === o) o.classList.remove("open"); });
+});
+function closeModals() { document.querySelectorAll(".modal-overlay.open").forEach(m => m.classList.remove("open")); }
+
+function openEditModal(orgId, orgName) {
+  document.getElementById("form-edit").reset();
+  resetCheckList("edit-comm-list"); resetCheckList("edit-svc-list");
+  document.getElementById("edit-org-name-display").textContent = decodeURIComponent(orgName.replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"'));
+  document.querySelector("#form-edit [name='org_id']").value = orgId;
+  document.querySelector("#form-edit [name='existing_org_name']").value = orgName;
+  document.getElementById("modal-edit").classList.add("open");
+}
+
+// ── Submit helpers ────────────────────────────────────────────
+async function sbInsert(table, data) {
+  const res = await fetch(`${SB_URL}/rest/v1/${table}`, {
+    method: "POST",
+    headers: {
+      "apikey": SB_ANON,
+      "Authorization": `Bearer ${SB_ANON}`,
+      "Content-Type": "application/json",
+      "Prefer": "return=minimal",
+    },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(`Submit failed: ${res.status} ${await res.text()}`);
+}
+
+function showToast(msg, isError=false) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.className = "toast" + (isError ? " error" : "");
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 4000);
+}
+
+function getFormData(formId) {
+  const form = document.getElementById(formId);
+  const data = {};
+  new FormData(form).forEach((v, k) => { if (v) data[k] = v; });
+  return data;
+}
+
+// ── Submit Add Org ────────────────────────────────────────────
+document.getElementById("submit-add").addEventListener("click", async () => {
+  const form = document.getElementById("form-add");
+  if (!form.reportValidity()) return;
+  const btn = document.getElementById("submit-add");
+  btn.disabled = true; btn.textContent = "Submitting…";
+
+  const data = getFormData("form-add");
+  data.submission_type = "new_org";
+  const services    = getChecked("add-svc-list");
+  const communities = getChecked("add-comm-list");
+  if (services.length)    data.services          = services;
+  if (communities.length) data.communities_served = communities;
+  if (data.has_membership) data.has_membership = data.has_membership === "true";
+  if (data.year_founded)   data.year_founded   = parseInt(data.year_founded);
+
+  try {
+    await sbInsert("pending_submissions", data);
+    document.getElementById("modal-add").classList.remove("open");
+    form.reset(); resetCheckList("add-comm-list"); resetCheckList("add-svc-list");
+    showToast("✓ Thank you! Your submission is under review.");
+  } catch(e) {
+    showToast(e.message, true);
+  } finally {
+    btn.disabled = false; btn.textContent = "Submit Organization";
+  }
 });
 
-document.getElementById("filter-state").addEventListener("change", e => {
-  filters.state = e.target.value;
-  renderActiveFilters();
-  render();
+// ── Submit Suggest Edit ───────────────────────────────────────
+document.getElementById("submit-edit").addEventListener("click", async () => {
+  const form = document.getElementById("form-edit");
+  if (!form.reportValidity()) return;
+  const btn = document.getElementById("submit-edit");
+  btn.disabled = true; btn.textContent = "Submitting…";
+
+  const data = getFormData("form-edit");
+  data.submission_type = "edit_org";
+  const services    = getChecked("edit-svc-list");
+  const communities = getChecked("edit-comm-list");
+  if (services.length)    data.services          = services;
+  if (communities.length) data.communities_served = communities;
+  if (data.year_founded)  data.year_founded = parseInt(data.year_founded);
+  if (data.scope_of_service === "") delete data.scope_of_service;
+
+  try {
+    await sbInsert("pending_submissions", data);
+    document.getElementById("modal-edit").classList.remove("open");
+    form.reset();
+    showToast("✓ Thanks for the correction! It will be reviewed shortly.");
+  } catch(e) {
+    showToast(e.message, true);
+  } finally {
+    btn.disabled = false; btn.textContent = "Submit Correction";
+  }
 });
 
-// ── Boot ──────────────────────────────────────────────────────
 loadData();
 </script>
 </body>

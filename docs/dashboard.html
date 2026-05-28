@@ -105,10 +105,33 @@
     .stat-card.at-risk  .stat-value { color: #fcd34d; }
     .stat-card.critical .stat-value { color: #fca5a5; }
 
+    /* ── TAB NAV ── */
+    .tab-nav {
+      background: white; border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 200;
+      box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    }
+    .tab-nav-inner {
+      max-width: 1300px; margin: 0 auto; padding: 0 24px;
+      display: flex; gap: 0;
+    }
+    .tab-btn {
+      padding: 12px 20px; font-size: 0.88rem; font-weight: 600;
+      background: none; border: none; cursor: pointer; color: var(--text-soft);
+      border-bottom: 3px solid transparent; margin-bottom: -1px;
+      transition: color .15s, border-color .15s; display: flex; align-items: center; gap: 8px;
+    }
+    .tab-btn:hover { color: var(--text-dark); }
+    .tab-btn.active { color: var(--green-deep); border-bottom-color: var(--green-mid); }
+    .pending-badge {
+      background: var(--critical); color: white; font-size: 0.68rem; font-weight: 700;
+      min-width: 18px; height: 18px; border-radius: 9px; padding: 0 5px;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+
     /* ── FILTER BAR ── */
     .filter-bar {
       background: white; border-bottom: 1px solid var(--border);
-      position: sticky; top: 0; z-index: 100;
       box-shadow: 0 2px 6px rgba(0,0,0,.06);
     }
     .filter-inner {
@@ -166,7 +189,6 @@
     }
     .tier-Healthy  { background: #d1fae5; color: #065f46; }
     .tier-Stable   { background: #dbeafe; color: #1e40af; }
-    .tier-At.Risk,
     .tier-At-Risk  { background: #fef3c7; color: #92400e; }
     .tier-Critical { background: #fee2e2; color: #991b1b; }
     .tier-none     { background: var(--cream-dark); color: var(--text-soft); }
@@ -211,12 +233,9 @@
       letter-spacing: 0.05em; color: var(--text-soft); margin-bottom: 12px;
       padding-bottom: 6px; border-bottom: 1px solid var(--cream-dark);
     }
-    .score-breakdown {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-    }
+    .score-breakdown { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .breakdown-item {
-      background: var(--cream); border-radius: 6px; padding: 12px;
-      text-align: center;
+      background: var(--cream); border-radius: 6px; padding: 12px; text-align: center;
     }
     .breakdown-item .val { font-size: 1.6rem; font-weight: 700; line-height: 1; }
     .breakdown-item .lbl { font-size: 0.7rem; color: var(--text-soft); margin-top: 3px; }
@@ -230,13 +249,117 @@
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.3); z-index: 499; }
     .overlay.open { display: block; }
 
+    /* ── PENDING SECTION ── */
+    #section-pending { max-width: 1300px; margin: 0 auto; padding: 24px 24px 48px; }
+
+    .pending-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
+    }
+    .pending-header h2 { font-size: 1rem; font-weight: 700; color: var(--text-dark); }
+    .pending-header p  { font-size: 0.83rem; color: var(--text-soft); margin-top: 2px; }
+
+    .pending-empty {
+      text-align: center; padding: 64px 24px;
+      background: white; border-radius: var(--radius); border: 1px solid var(--border);
+    }
+    .pending-empty .empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .pending-empty p { color: var(--text-soft); font-size: 0.88rem; }
+
+    /* Submission card */
+    .sub-card {
+      background: white; border-radius: var(--radius); border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm); margin-bottom: 16px; overflow: hidden;
+    }
+    .sub-card-top {
+      padding: 14px 18px; display: flex; align-items: flex-start; gap: 12px;
+      border-bottom: 1px solid var(--cream-dark);
+    }
+    .sub-card-info { flex: 1; min-width: 0; }
+    .sub-org-name { font-size: 1rem; font-weight: 700; color: var(--text-dark); }
+    .sub-meta { font-size: 0.78rem; color: var(--text-soft); margin-top: 3px; }
+    .sub-submitter-line {
+      font-size: 0.8rem; color: var(--text-mid); margin-top: 6px;
+    }
+    .sub-notes {
+      font-size: 0.8rem; color: var(--text-soft); font-style: italic; margin-top: 4px;
+    }
+    .sub-card-actions {
+      display: flex; gap: 8px; align-items: flex-start; flex-shrink: 0;
+    }
+    .btn-approve {
+      padding: 6px 14px; background: var(--healthy); color: white;
+      border: none; border-radius: 5px; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; transition: opacity .15s;
+    }
+    .btn-approve:hover { opacity: 0.85; }
+    .btn-approve:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-reject {
+      padding: 6px 14px; background: white; color: var(--critical);
+      border: 1px solid var(--critical); border-radius: 5px; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; transition: background .15s, color .15s;
+    }
+    .btn-reject:hover { background: #fee2e2; }
+    .btn-reject:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Type badge */
+    .type-badge {
+      display: inline-block; padding: 2px 8px; border-radius: 12px;
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+      flex-shrink: 0; margin-top: 2px;
+    }
+    .type-new_org { background: #d1fae5; color: #065f46; }
+    .type-edit_org { background: #dbeafe; color: #1e40af; }
+
+    /* Proposed fields grid */
+    .sub-card-body { padding: 16px 18px; }
+    .fields-group { margin-bottom: 16px; }
+    .fields-group-label {
+      font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; color: var(--text-soft); margin-bottom: 10px;
+    }
+    .fields-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .fields-grid.full { grid-template-columns: 1fr; }
+    .field-item { display: flex; flex-direction: column; gap: 3px; }
+    .field-label { font-size: 0.7rem; color: var(--text-soft); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+    .field-input {
+      padding: 6px 9px; border: 1px solid var(--border); border-radius: 5px;
+      font-size: 0.83rem; background: var(--cream); color: var(--text-dark);
+      font-family: inherit; outline: none; width: 100%;
+    }
+    .field-input:focus { border-color: var(--green-mid); background: white; }
+    .field-input.textarea { min-height: 64px; resize: vertical; }
+    select.field-input { appearance: none; cursor: pointer; }
+
+    /* Reviewer notes */
+    .reviewer-notes-row {
+      margin-top: 12px; padding-top: 12px;
+      border-top: 1px solid var(--cream-dark); display: flex; gap: 10px; align-items: flex-end;
+    }
+    .reviewer-notes-row .field-item { flex: 1; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+      padding: 12px 20px; border-radius: 8px; font-size: 0.88rem; font-weight: 600;
+      color: white; box-shadow: 0 4px 16px rgba(0,0,0,.2); pointer-events: none;
+      opacity: 0; transform: translateY(8px);
+      transition: opacity .2s, transform .2s;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.ok  { background: var(--healthy); }
+    .toast.err { background: var(--critical); }
+
     @media (max-width: 900px) {
       .summary-inner { grid-template-columns: repeat(3, 1fr); }
       .detail-panel  { width: 100%; }
+      .fields-grid   { grid-template-columns: 1fr; }
     }
     @media (max-width: 600px) {
       .summary-inner { grid-template-columns: repeat(2, 1fr); }
       main { padding: 12px 12px 32px; }
+      #section-pending { padding: 12px 12px 32px; }
+      .sub-card-top { flex-direction: column; }
+      .sub-card-actions { width: 100%; justify-content: flex-end; }
     }
   </style>
 </head>
@@ -316,55 +439,75 @@
     </div>
   </div>
 
-  <!-- Filter bar -->
-  <div class="filter-bar">
-    <div class="filter-inner">
-      <div class="search-wrap">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="search" id="search" placeholder="Search organizations…">
-      </div>
-      <select class="filter-select" id="filter-tier">
-        <option value="">All tiers</option>
-        <option value="Healthy">Healthy</option>
-        <option value="Stable">Stable</option>
-        <option value="At Risk">At Risk</option>
-        <option value="Critical">Critical</option>
-        <option value="unscored">Unscored</option>
-      </select>
-      <select class="filter-select" id="filter-state">
-        <option value="">All states</option>
-      </select>
-      <select class="filter-select" id="filter-trend">
-        <option value="">All trends</option>
-        <option value="Improving">Improving ↑</option>
-        <option value="Stable">Stable →</option>
-        <option value="Declining">Declining ↓</option>
-      </select>
-      <span class="result-count" id="result-count"></span>
+  <!-- Tab navigation -->
+  <div class="tab-nav">
+    <div class="tab-nav-inner">
+      <button class="tab-btn active" id="tab-btn-orgs" onclick="switchTab('orgs')">Organizations</button>
+      <button class="tab-btn" id="tab-btn-pending" onclick="switchTab('pending')">
+        Pending
+        <span class="pending-badge" id="pending-count-badge" style="display:none">0</span>
+      </button>
     </div>
   </div>
 
-  <main>
-    <div class="table-wrap">
-      <table id="main-table">
-        <thead>
-          <tr>
-            <th data-col="name">Organization <span class="sort-icon">↕</span></th>
-            <th data-col="health_score" class="sorted">Score <span class="sort-icon">↓</span></th>
-            <th data-col="health_tier">Tier <span class="sort-icon">↕</span></th>
-            <th>Sub-scores</th>
-            <th data-col="qoq_change">QoQ <span class="sort-icon">↕</span></th>
-            <th data-col="trend">Trend <span class="sort-icon">↕</span></th>
-            <th data-col="last_scored">Last Scored <span class="sort-icon">↕</span></th>
-          </tr>
-        </thead>
-        <tbody id="table-body">
-          <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-soft)">Loading…</td></tr>
-        </tbody>
-      </table>
+  <!-- ── ORGS TAB ── -->
+  <div id="section-orgs">
+    <!-- Filter bar -->
+    <div class="filter-bar">
+      <div class="filter-inner">
+        <div class="search-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="search" id="search" placeholder="Search organizations…">
+        </div>
+        <select class="filter-select" id="filter-tier">
+          <option value="">All tiers</option>
+          <option value="Healthy">Healthy</option>
+          <option value="Stable">Stable</option>
+          <option value="At Risk">At Risk</option>
+          <option value="Critical">Critical</option>
+          <option value="unscored">Unscored</option>
+        </select>
+        <select class="filter-select" id="filter-state">
+          <option value="">All states</option>
+        </select>
+        <select class="filter-select" id="filter-trend">
+          <option value="">All trends</option>
+          <option value="Improving">Improving ↑</option>
+          <option value="Stable">Stable →</option>
+          <option value="Declining">Declining ↓</option>
+        </select>
+        <span class="result-count" id="result-count"></span>
+      </div>
     </div>
-  </main>
-</div>
+
+    <main>
+      <div class="table-wrap">
+        <table id="main-table">
+          <thead>
+            <tr>
+              <th data-col="name">Organization <span class="sort-icon">↕</span></th>
+              <th data-col="health_score" class="sorted">Score <span class="sort-icon">↓</span></th>
+              <th data-col="health_tier">Tier <span class="sort-icon">↕</span></th>
+              <th>Sub-scores</th>
+              <th data-col="qoq_change">QoQ <span class="sort-icon">↕</span></th>
+              <th data-col="trend">Trend <span class="sort-icon">↕</span></th>
+              <th data-col="last_scored">Last Scored <span class="sort-icon">↕</span></th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-soft)">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div><!-- /section-orgs -->
+
+  <!-- ── PENDING TAB ── -->
+  <div id="section-pending" style="display:none">
+    <div id="pending-main"></div>
+  </div>
+
+</div><!-- /app -->
 
 <!-- Detail panel -->
 <div class="overlay" id="overlay"></div>
@@ -376,6 +519,9 @@
   </div>
   <div class="detail-body" id="detail-body"></div>
 </div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
 
 <script>
 // ── Password auth ─────────────────────────────────────────────
@@ -400,7 +546,7 @@ async function tryLogin() {
     sessionStorage.setItem("banyan_auth", "1");
     document.getElementById("login-screen").style.display = "none";
     document.getElementById("app").style.display = "block";
-    loadData();
+    init();
   } else {
     document.getElementById("login-error").style.display = "block";
     document.getElementById("pwd-input").value = "";
@@ -418,17 +564,58 @@ if (checkAuth()) {
   document.getElementById("app").style.display = "block";
 }
 
+// ── Config & Supabase ─────────────────────────────────────────
+let SB_URL  = "";
+let SB_ANON = "";
+
+async function loadConfig() {
+  try {
+    const cfg = await fetch("./data/config.json").then(r => r.json());
+    SB_URL  = cfg.supabase_url  || "";
+    SB_ANON = cfg.supabase_anon_key || "";
+  } catch (_) { /* config not yet generated */ }
+}
+
+async function sbCall(method, path, body) {
+  if (!SB_URL || !SB_ANON) throw new Error("Supabase not configured — regenerate site data to create config.json.");
+  const url = SB_URL.replace(/\/$/, "") + "/rest/v1/" + path;
+  const opts = {
+    method,
+    headers: {
+      "apikey":        SB_ANON,
+      "Authorization": `Bearer ${SB_ANON}`,
+      "Content-Type":  "application/json",
+      "Prefer":        method === "POST" ? "return=representation" : "return=minimal",
+    },
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(url, opts);
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`Supabase ${res.status}: ${txt}`);
+  }
+  return method === "GET" ? res.json() : res;
+}
+
 // ── Data & state ──────────────────────────────────────────────
 let allOrgs = [];
+let allPending = [];
 let sortCol = "health_score";
-let sortDir = -1; // -1 = desc
-
+let sortDir = -1;
 const filters = { search: "", tier: "", state: "", trend: "" };
+let activeTab = "orgs";
 
-// ── Load ──────────────────────────────────────────────────────
+// ── Init ──────────────────────────────────────────────────────
+async function init() {
+  await loadConfig();
+  await loadData();
+  await loadPending();
+}
+
+// ── Load org scores ───────────────────────────────────────────
 async function loadData() {
   try {
-    const res  = await fetch("./data/scores.json");
+    const res = await fetch("./data/scores.json");
     allOrgs = await res.json();
     initFilters();
     buildSummary();
@@ -441,6 +628,325 @@ async function loadData() {
   }
 }
 
+// ── Load pending submissions ───────────────────────────────────
+async function loadPending() {
+  const container = document.getElementById("pending-main");
+
+  if (!SB_URL || !SB_ANON) {
+    container.innerHTML = `
+      <div class="pending-empty">
+        <div class="empty-icon">🔑</div>
+        <p>Supabase not configured.<br>Re-run <code>generate_site.py</code> with the <code>SUPABASE_ANON_KEY</code> env var to enable this feature.</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = `<div style="padding:40px;text-align:center;color:var(--text-soft)">Loading submissions…</div>`;
+
+  try {
+    const rows = await sbCall(
+      "GET",
+      "pending_submissions?status=eq.pending&order=created_at.desc&limit=200",
+      null
+    );
+    allPending = rows;
+    updatePendingBadge(rows.length);
+    renderPending(rows);
+  } catch(e) {
+    container.innerHTML = `<div style="padding:40px;text-align:center;color:var(--critical)">${e.message}</div>`;
+  }
+}
+
+function updatePendingBadge(count) {
+  const badge = document.getElementById("pending-count-badge");
+  if (count > 0) {
+    badge.textContent = count;
+    badge.style.display = "inline-flex";
+  } else {
+    badge.style.display = "none";
+  }
+}
+
+// ── Render pending submissions ────────────────────────────────
+function renderPending(subs) {
+  const container = document.getElementById("pending-main");
+
+  if (!subs.length) {
+    container.innerHTML = `
+      <div class="pending-empty">
+        <div class="empty-icon">✅</div>
+        <p>No pending submissions — you're all caught up!</p>
+      </div>`;
+    return;
+  }
+
+  const header = `
+    <div class="pending-header">
+      <div>
+        <h2>${subs.length} pending submission${subs.length !== 1 ? "s" : ""}</h2>
+        <p>Review proposed changes before they go live in the directory.</p>
+      </div>
+    </div>`;
+
+  const cards = subs.map(s => buildSubCard(s)).join("");
+  container.innerHTML = header + cards;
+}
+
+function buildSubCard(s) {
+  const typeLabel = s.submission_type === "new_org" ? "New Org" : "Edit Suggestion";
+  const displayName = s.name || s.existing_org_name || "(unnamed)";
+  const dateStr = s.created_at ? s.created_at.slice(0, 10) : "";
+  const submitterStr = [s.submitter_name, s.submitter_email].filter(Boolean).join(" · ");
+
+  // Build editable field sections
+  const textFields = [
+    { key: "name",            label: "Organization Name",  type: "text" },
+    { key: "description",     label: "Description",        type: "textarea" },
+    { key: "website_url",     label: "Website URL",        type: "text" },
+    { key: "email",           label: "Email",              type: "text" },
+    { key: "twitter_url",     label: "Twitter / X URL",    type: "text" },
+    { key: "facebook_url",    label: "Facebook URL",       type: "text" },
+    { key: "instagram_url",   label: "Instagram URL",      type: "text" },
+    { key: "state",           label: "State",              type: "text" },
+    { key: "service_area",    label: "Service Area",       type: "text" },
+    { key: "primary_contact", label: "Primary Contact",    type: "text" },
+    { key: "year_founded",    label: "Year Founded",       type: "number" },
+    { key: "num_members",     label: "# Members",          type: "number" },
+  ];
+
+  const scopeField = { key: "scope_of_service", label: "Scope", type: "scope" };
+  const membershipField = { key: "has_membership", label: "Has Membership?", type: "boolean" };
+  const servicesField = { key: "services", label: "Services (comma-separated)", type: "array" };
+  const communitiesField = { key: "communities_served", label: "Communities Served (comma-separated)", type: "array" };
+
+  const allFields = [...textFields, scopeField, membershipField, servicesField, communitiesField];
+  const populated = allFields.filter(f => {
+    const v = s[f.key];
+    if (v == null) return false;
+    if (Array.isArray(v) && v.length === 0) return false;
+    return true;
+  });
+
+  const fieldInputs = populated.map(f => buildFieldInput(s.id, f, s[f.key])).join("");
+
+  const fieldsHtml = populated.length
+    ? `<div class="sub-card-body">
+        <div class="fields-group-label">Proposed Values — edit before approving if needed</div>
+        <div class="fields-grid">${fieldInputs}</div>
+        <div class="reviewer-notes-row">
+          <div class="field-item">
+            <label class="field-label">Reviewer Notes (optional)</label>
+            <input type="text" class="field-input" id="rev-notes-${s.id}" placeholder="Internal note on this decision…">
+          </div>
+        </div>
+      </div>`
+    : `<div class="sub-card-body"><p style="color:var(--text-soft);font-size:0.83rem">No field values submitted.</p></div>`;
+
+  return `
+    <div class="sub-card" id="subcard-${s.id}">
+      <div class="sub-card-top">
+        <span class="type-badge type-${s.submission_type}">${typeLabel}</span>
+        <div class="sub-card-info">
+          <div class="sub-org-name">${esc(displayName)}</div>
+          <div class="sub-meta">${dateStr}${s.state ? " · " + esc(s.state) : ""}</div>
+          ${submitterStr ? `<div class="sub-submitter-line">👤 ${esc(submitterStr)}</div>` : ""}
+          ${s.submitter_notes ? `<div class="sub-notes">"${esc(s.submitter_notes)}"</div>` : ""}
+        </div>
+        <div class="sub-card-actions">
+          <button class="btn-approve" id="approve-btn-${s.id}" onclick="approveSub('${s.id}', '${s.submission_type}', '${s.org_id || ""}')">
+            ✓ Approve
+          </button>
+          <button class="btn-reject" id="reject-btn-${s.id}" onclick="rejectSub('${s.id}')">
+            ✗ Reject
+          </button>
+        </div>
+      </div>
+      ${fieldsHtml}
+    </div>`;
+}
+
+function buildFieldInput(subId, field, value) {
+  const id = `field-${subId}-${field.key}`;
+
+  if (field.type === "textarea") {
+    return `<div class="field-item" style="grid-column:1/-1">
+      <label class="field-label" for="${id}">${esc(field.label)}</label>
+      <textarea class="field-input textarea" id="${id}">${esc(String(value || ""))}</textarea>
+    </div>`;
+  }
+
+  if (field.type === "array") {
+    const arr = Array.isArray(value) ? value : [];
+    return `<div class="field-item" style="grid-column:1/-1">
+      <label class="field-label" for="${id}">${esc(field.label)}</label>
+      <input type="text" class="field-input" id="${id}" value="${esc(arr.join(", "))}">
+    </div>`;
+  }
+
+  if (field.type === "scope") {
+    const opts = ["National", "Regional", "Local"].map(o =>
+      `<option value="${o}"${value === o ? " selected" : ""}>${o}</option>`
+    ).join("");
+    return `<div class="field-item">
+      <label class="field-label" for="${id}">${esc(field.label)}</label>
+      <select class="field-input" id="${id}">
+        <option value="">— select —</option>${opts}
+      </select>
+    </div>`;
+  }
+
+  if (field.type === "boolean") {
+    const opts = [
+      `<option value=""${value == null ? " selected" : ""}>— not specified —</option>`,
+      `<option value="true"${value === true ? " selected" : ""}>Yes</option>`,
+      `<option value="false"${value === false ? " selected" : ""}>No</option>`,
+    ].join("");
+    return `<div class="field-item">
+      <label class="field-label" for="${id}">${esc(field.label)}</label>
+      <select class="field-input" id="${id}">${opts}</select>
+    </div>`;
+  }
+
+  return `<div class="field-item">
+    <label class="field-label" for="${id}">${esc(field.label)}</label>
+    <input type="${field.type}" class="field-input" id="${id}" value="${esc(String(value || ""))}">
+  </div>`;
+}
+
+// ── Gather edited field values from a card ─────────────────────
+function gatherOrgData(subId) {
+  function val(key) {
+    const el = document.getElementById(`field-${subId}-${key}`);
+    return el ? el.value.trim() : null;
+  }
+
+  const data = {};
+  const textKeys = ["name","description","website_url","email","twitter_url","facebook_url","instagram_url","state","service_area","primary_contact","scope_of_service"];
+  textKeys.forEach(k => {
+    const v = val(k);
+    if (v !== null && v !== "") data[k] = v;
+  });
+
+  const yr = val("year_founded");
+  if (yr) data.year_founded = parseInt(yr, 10) || null;
+
+  const nm = val("num_members");
+  if (nm) data.num_members = parseInt(nm, 10) || null;
+
+  const membership = val("has_membership");
+  if (membership === "true") data.has_membership = true;
+  else if (membership === "false") data.has_membership = false;
+
+  const services = val("services");
+  if (services) data.services = services.split(",").map(s => s.trim()).filter(Boolean);
+
+  const communities = val("communities_served");
+  if (communities) data.communities_served = communities.split(",").map(s => s.trim()).filter(Boolean);
+
+  return data;
+}
+
+// ── Approve submission ─────────────────────────────────────────
+async function approveSub(id, type, orgId) {
+  const approveBtn = document.getElementById(`approve-btn-${id}`);
+  const rejectBtn  = document.getElementById(`reject-btn-${id}`);
+  approveBtn.disabled = rejectBtn.disabled = true;
+  approveBtn.textContent = "Approving…";
+
+  const reviewerNotes = (document.getElementById(`rev-notes-${id}`) || {}).value || null;
+
+  try {
+    const orgData = gatherOrgData(id);
+
+    if (type === "new_org") {
+      await sbCall("POST", "organizations", orgData);
+    } else if (type === "edit_org" && orgId) {
+      await sbCall("PATCH", `organizations?id=eq.${orgId}`, orgData);
+    }
+
+    const patch = { status: "approved", reviewed_at: new Date().toISOString() };
+    if (reviewerNotes) patch.reviewer_notes = reviewerNotes;
+    await sbCall("PATCH", `pending_submissions?id=eq.${id}`, patch);
+
+    removeCard(id);
+    showToast("Approved and saved to directory ✓", false);
+    allPending = allPending.filter(s => s.id !== id);
+    updatePendingBadge(allPending.length);
+  } catch(e) {
+    approveBtn.disabled = rejectBtn.disabled = false;
+    approveBtn.textContent = "✓ Approve";
+    showToast("Error: " + e.message, true);
+  }
+}
+
+// ── Reject submission ──────────────────────────────────────────
+async function rejectSub(id) {
+  const approveBtn = document.getElementById(`approve-btn-${id}`);
+  const rejectBtn  = document.getElementById(`reject-btn-${id}`);
+  approveBtn.disabled = rejectBtn.disabled = true;
+  rejectBtn.textContent = "Rejecting…";
+
+  const reviewerNotes = (document.getElementById(`rev-notes-${id}`) || {}).value || null;
+
+  try {
+    const patch = { status: "rejected", reviewed_at: new Date().toISOString() };
+    if (reviewerNotes) patch.reviewer_notes = reviewerNotes;
+    await sbCall("PATCH", `pending_submissions?id=eq.${id}`, patch);
+
+    removeCard(id);
+    showToast("Submission rejected", false);
+    allPending = allPending.filter(s => s.id !== id);
+    updatePendingBadge(allPending.length);
+  } catch(e) {
+    approveBtn.disabled = rejectBtn.disabled = false;
+    rejectBtn.textContent = "✗ Reject";
+    showToast("Error: " + e.message, true);
+  }
+}
+
+function removeCard(id) {
+  const card = document.getElementById(`subcard-${id}`);
+  if (card) {
+    card.style.transition = "opacity .3s";
+    card.style.opacity = "0";
+    setTimeout(() => {
+      card.remove();
+      // If no cards left, show empty state
+      if (!document.querySelector(".sub-card")) {
+        document.getElementById("pending-main").innerHTML = `
+          <div class="pending-empty">
+            <div class="empty-icon">✅</div>
+            <p>No pending submissions — you're all caught up!</p>
+          </div>`;
+      } else {
+        // Update header count
+        const remaining = document.querySelectorAll(".sub-card").length;
+        const h = document.querySelector(".pending-header h2");
+        if (h) h.textContent = `${remaining} pending submission${remaining !== 1 ? "s" : ""}`;
+      }
+    }, 300);
+  }
+}
+
+// ── Tab switching ─────────────────────────────────────────────
+function switchTab(tab) {
+  activeTab = tab;
+  document.getElementById("section-orgs").style.display     = tab === "orgs"    ? "" : "none";
+  document.getElementById("section-pending").style.display  = tab === "pending" ? "" : "none";
+  document.getElementById("tab-btn-orgs").classList.toggle("active",    tab === "orgs");
+  document.getElementById("tab-btn-pending").classList.toggle("active", tab === "pending");
+}
+
+// ── Toast ─────────────────────────────────────────────────────
+function showToast(msg, isError) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "toast " + (isError ? "err" : "ok");
+  requestAnimationFrame(() => t.classList.add("show"));
+  setTimeout(() => { t.classList.remove("show"); }, 3500);
+}
+
+// ── Org table: filters & summary ──────────────────────────────
 function initFilters() {
   const states = [...new Set(allOrgs.map(o => o.state).filter(Boolean))].sort();
   const sel = document.getElementById("filter-state");
@@ -467,8 +973,8 @@ function matchesFilters(o) {
     if (filters.tier === "unscored") { if (o.health_tier) return false; }
     else if (o.health_tier !== filters.tier) return false;
   }
-  if (filters.state  && o.state !== filters.state) return false;
-  if (filters.trend  && o.trend !== filters.trend) return false;
+  if (filters.state && o.state !== filters.state) return false;
+  if (filters.trend && o.trend !== filters.trend) return false;
   return true;
 }
 
@@ -483,7 +989,7 @@ function sortedOrgs(orgs) {
   });
 }
 
-// ── Render ────────────────────────────────────────────────────
+// ── Render org table ───────────────────────────────────────────
 function render() {
   const visible = sortedOrgs(allOrgs.filter(matchesFilters));
   document.getElementById("result-count").textContent = `${visible.length} of ${allOrgs.length} orgs`;
@@ -649,10 +1155,10 @@ document.getElementById("filter-tier").addEventListener("change", e => { filters
 document.getElementById("filter-state").addEventListener("change", e => { filters.state = e.target.value; render(); });
 document.getElementById("filter-trend").addEventListener("change", e => { filters.trend = e.target.value; render(); });
 
-function esc(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function esc(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
 // Auto-load if already authenticated
-if (checkAuth()) loadData();
+if (checkAuth()) init();
 </script>
 </body>
 </html>
