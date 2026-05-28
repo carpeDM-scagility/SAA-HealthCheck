@@ -1,11 +1,11 @@
 """
 SAA Org Health Tracker — Static Site Data Generator
-Reads organizations from Supabase and writes public JSON files for GitHub Pages.
-Excludes sensitive fields (EIN, health scores, budget).
+Reads organizations and health scores from Supabase and writes JSON files for GitHub Pages.
 
 Output:
-  docs/data/orgs.json   — array of public org records (sorted by name)
-  docs/data/meta.json   — unique filter values (states, services, communities)
+  docs/data/orgs.json    — public org records (no health data)
+  docs/data/meta.json    — filter options (states, services, communities)
+  docs/data/scores.json  — health scores per org (private dashboard data)
 
 Usage:
   python generate_site.py
@@ -115,6 +115,115 @@ def build_meta(orgs: list[dict]) -> dict:
     }
 
 
+def fetch_scores(sb_url: str, sb_key: str) -> list[dict]:
+    """
+    Fetch health scores joined with org name/state, grouped by org.
+    Returns one record per org with latest scores + up to 4 historical quarters.
+    """
+    base = sb_url.rstrip("/") + "/rest/v1"
+    headers = {
+        "apikey":        sb_key,
+        "Authorization": f"Bearer {sb_key}",
+        "Accept":        "application/json",
+    }
+
+    # Fetch all health score rows, newest first, with org details embedded
+    resp = requests.get(
+        f"{base}/health_scores",
+        headers=headers,
+        params={
+            "select": "organization_id,scored_on,total_score,health_tier,"
+                      "presence_score,activity_score,reach_score,financial_score,"
+                      "qoq_change,trend,notes,"
+                      "organizations(name,state,scope_of_service)",
+            "order":  "scored_on.desc",
+            "limit":  5000,
+        },
+        timeout=30,
+    )
+    resp.raise_for_status()
+    rows = resp.json()
+
+    # Also fetch org-level summary (health_score, health_tier, last_scored)
+    org_resp = requests.get(
+        f"{base}/organizations",
+        headers=headers,
+        params={
+            "select": "id,name,state,scope_of_service,health_score,health_tier,last_scored",
+            "order":  "name.asc",
+            "limit":  2000,
+        },
+        timeout=30,
+    )
+    org_resp.raise_for_status()
+    org_map = {o["id"]: o for o in org_resp.json()}
+
+    # Group score rows by org
+    by_org: dict[str, list] = {}
+    for row in rows:
+        oid = row["organization_id"]
+        if oid not in by_org:
+            by_org[oid] = []
+        by_org[oid].append(row)
+
+    # Build output: one record per org, history array (max 4 quarters)
+    output = []
+    for oid, score_rows in by_org.items():
+        org_info = org_map.get(oid, {})
+        linked   = score_rows[0].get("organizations") or {}
+        latest   = score_rows[0]
+
+        history = []
+        for r in score_rows[:4]:
+            history.append({
+                "scored_on":       r.get("scored_on"),
+                "total_score":     r.get("total_score"),
+                "health_tier":     r.get("health_tier"),
+                "presence_score":  r.get("presence_score"),
+                "activity_score":  r.get("activity_score"),
+                "reach_score":     r.get("reach_score"),
+                "financial_score": r.get("financial_score"),
+                "qoq_change":      r.get("qoq_change"),
+                "trend":           r.get("trend"),
+            })
+
+        output.append({
+            "id":              oid,
+            "name":            linked.get("name") or org_info.get("name", ""),
+            "state":           linked.get("state") or org_info.get("state", ""),
+            "scope":           linked.get("scope_of_service") or org_info.get("scope_of_service", ""),
+            "health_score":    org_info.get("health_score"),
+            "health_tier":     org_info.get("health_tier"),
+            "last_scored":     org_info.get("last_scored"),
+            "presence_score":  latest.get("presence_score"),
+            "activity_score":  latest.get("activity_score"),
+            "reach_score":     latest.get("reach_score"),
+            "financial_score": latest.get("financial_score"),
+            "qoq_change":      latest.get("qoq_change"),
+            "trend":           latest.get("trend"),
+            "history":         history,
+        })
+
+    # Add orgs with no scores yet
+    scored_ids = set(by_org.keys())
+    for oid, org in org_map.items():
+        if oid not in scored_ids:
+            output.append({
+                "id":           oid,
+                "name":         org.get("name", ""),
+                "state":        org.get("state", ""),
+                "scope":        org.get("scope_of_service", ""),
+                "health_score": org.get("health_score"),
+                "health_tier":  org.get("health_tier"),
+                "last_scored":  org.get("last_scored"),
+                "history":      [],
+            })
+
+    # Sort by health_score desc (nulls last), then name
+    output.sort(key=lambda o: (-(o["health_score"] or -1), o["name"].lower()))
+    return output
+
+
 def write_json(path: Path, data) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
@@ -139,15 +248,22 @@ def run(output_dir: str = "../docs/data") -> None:
     orgs = [clean_org(o) for o in raw_orgs]
     meta = build_meta(orgs)
 
+    log.info("Fetching health scores from Supabase...")
+    scores = fetch_scores(sb_url, sb_key)
+    log.info(f"  {len(scores)} org score records built")
+
     log.info("Writing output files...")
     write_json(out / "orgs.json", orgs)
     write_json(out / "meta.json", meta)
+    write_json(out / "scores.json", scores)
 
+    scored = sum(1 for s in scores if s.get("health_score") is not None)
     log.info(
         f"\nDone. {meta['total']} orgs | "
         f"{len(meta['states'])} states | "
         f"{len(meta['services'])} service types | "
-        f"{len(meta['communities'])} community tags"
+        f"{len(meta['communities'])} community tags | "
+        f"{scored} orgs scored"
     )
 
 

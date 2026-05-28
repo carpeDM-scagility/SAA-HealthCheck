@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Banyan — Health Dashboard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green-deep:  #1a4731;
+      --green-mid:   #2d6a4f;
+      --green-light: #52b788;
+      --amber:       #c97d2e;
+      --cream:       #faf8f5;
+      --cream-dark:  #f0ece6;
+      --text-dark:   #1a2633;
+      --text-mid:    #4a5568;
+      --text-soft:   #718096;
+      --border:      #ddd8d0;
+      --white:       #ffffff;
+      --shadow-sm:   0 1px 3px rgba(0,0,0,.08);
+      --shadow-md:   0 4px 12px rgba(0,0,0,.1);
+      --radius:      8px;
+
+      --healthy:  #059669;
+      --stable:   #2563eb;
+      --at-risk:  #d97706;
+      --critical: #dc2626;
+    }
+
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--cream); color: var(--text-dark); min-height: 100vh; }
+
+    /* ── LOGIN SCREEN ── */
+    #login-screen {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; background: var(--green-deep);
+    }
+    .login-box {
+      background: white; border-radius: 12px; padding: 40px 36px;
+      width: 100%; max-width: 380px; box-shadow: var(--shadow-md);
+      text-align: center;
+    }
+    .login-logo { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 24px; }
+    .login-logo h1 { font-size: 1.6rem; font-weight: 700; color: var(--green-deep); }
+    .login-box p { font-size: 0.88rem; color: var(--text-soft); margin-bottom: 24px; }
+    .login-box input[type="password"] {
+      width: 100%; padding: 10px 14px; border: 1px solid var(--border);
+      border-radius: 6px; font-size: 1rem; margin-bottom: 12px; outline: none;
+    }
+    .login-box input:focus { border-color: var(--green-mid); }
+    .login-btn {
+      width: 100%; padding: 10px; background: var(--green-deep); color: white;
+      border: none; border-radius: 6px; font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; transition: background .15s;
+    }
+    .login-btn:hover { background: var(--green-mid); }
+    .login-error { color: var(--critical); font-size: 0.82rem; margin-top: 8px; display: none; }
+
+    /* ── APP SHELL ── */
+    #app { display: none; }
+
+    header {
+      background: var(--green-deep); color: white; padding: 0 24px;
+    }
+    .header-inner {
+      max-width: 1300px; margin: 0 auto; padding: 16px 0;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
+    .logo h1 { font-size: 1.3rem; font-weight: 700; }
+    .logo span { font-size: 0.75rem; opacity: 0.6; }
+    .header-badge {
+      margin-left: 12px; background: var(--amber); color: white;
+      font-size: 0.7rem; font-weight: 700; padding: 3px 8px; border-radius: 4px;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+    .last-updated { font-size: 0.75rem; opacity: 0.55; }
+    .logout-btn {
+      font-size: 0.8rem; color: rgba(255,255,255,0.6); background: none;
+      border: 1px solid rgba(255,255,255,0.2); border-radius: 4px;
+      padding: 4px 10px; cursor: pointer;
+    }
+    .logout-btn:hover { color: white; border-color: rgba(255,255,255,0.5); }
+
+    /* ── SUMMARY CARDS ── */
+    .summary-bar {
+      background: var(--green-deep); padding: 0 24px 20px;
+      border-bottom: 3px solid var(--amber);
+    }
+    .summary-inner {
+      max-width: 1300px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
+    }
+    .stat-card {
+      background: rgba(255,255,255,0.08); border-radius: var(--radius);
+      padding: 14px 16px; border: 1px solid rgba(255,255,255,0.1);
+    }
+    .stat-label { font-size: 0.7rem; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .stat-value { font-size: 1.8rem; font-weight: 700; color: white; line-height: 1; }
+    .stat-sub   { font-size: 0.72rem; color: rgba(255,255,255,0.45); margin-top: 2px; }
+    .stat-card.healthy  .stat-value { color: #6ee7b7; }
+    .stat-card.stable   .stat-value { color: #93c5fd; }
+    .stat-card.at-risk  .stat-value { color: #fcd34d; }
+    .stat-card.critical .stat-value { color: #fca5a5; }
+
+    /* ── FILTER BAR ── */
+    .filter-bar {
+      background: white; border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 6px rgba(0,0,0,.06);
+    }
+    .filter-inner {
+      max-width: 1300px; margin: 0 auto;
+      padding: 10px 24px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    }
+    .search-wrap { flex: 1; min-width: 200px; position: relative; }
+    .search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-soft); pointer-events: none; }
+    input[type="search"] {
+      width: 100%; padding: 7px 12px 7px 32px; border: 1px solid var(--border);
+      border-radius: 6px; font-size: 0.88rem; background: var(--cream); outline: none;
+    }
+    input[type="search"]:focus { border-color: var(--green-mid); background: white; }
+    select.filter-select {
+      padding: 7px 26px 7px 10px; border: 1px solid var(--border); border-radius: 6px;
+      font-size: 0.83rem; background: var(--cream); color: var(--text-dark); cursor: pointer;
+      outline: none; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 7px center;
+    }
+    .result-count { font-size: 0.8rem; color: var(--text-soft); margin-left: auto; white-space: nowrap; }
+
+    /* ── TABLE ── */
+    main { max-width: 1300px; margin: 0 auto; padding: 20px 24px 48px; }
+
+    .table-wrap { background: white; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow-sm); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    thead th {
+      background: var(--cream-dark); padding: 10px 14px; text-align: left;
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.04em; color: var(--text-soft); border-bottom: 1px solid var(--border);
+      white-space: nowrap; cursor: pointer; user-select: none;
+    }
+    thead th:hover { color: var(--text-dark); }
+    thead th .sort-icon { margin-left: 4px; opacity: 0.4; }
+    thead th.sorted .sort-icon { opacity: 1; color: var(--green-mid); }
+    tbody tr { border-bottom: 1px solid var(--cream-dark); cursor: pointer; transition: background .1s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #f8faf9; }
+    tbody td { padding: 10px 14px; vertical-align: middle; }
+
+    .org-name { font-weight: 600; color: var(--text-dark); }
+    .org-state { font-size: 0.78rem; color: var(--text-soft); margin-top: 1px; }
+
+    /* Score bar */
+    .score-cell { white-space: nowrap; }
+    .score-num { font-weight: 700; font-size: 1rem; }
+    .score-bar-wrap { width: 80px; height: 4px; background: var(--cream-dark); border-radius: 2px; margin-top: 4px; }
+    .score-bar { height: 100%; border-radius: 2px; }
+
+    /* Tier badge */
+    .tier-badge {
+      display: inline-block; padding: 2px 8px; border-radius: 12px;
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .tier-Healthy  { background: #d1fae5; color: #065f46; }
+    .tier-Stable   { background: #dbeafe; color: #1e40af; }
+    .tier-At.Risk,
+    .tier-At-Risk  { background: #fef3c7; color: #92400e; }
+    .tier-Critical { background: #fee2e2; color: #991b1b; }
+    .tier-none     { background: var(--cream-dark); color: var(--text-soft); }
+
+    /* Sub-scores */
+    .sub-scores { display: flex; gap: 6px; }
+    .sub { text-align: center; }
+    .sub-label { font-size: 0.65rem; color: var(--text-soft); text-transform: uppercase; margin-bottom: 2px; }
+    .sub-val { font-size: 0.82rem; font-weight: 600; }
+
+    /* Trend */
+    .trend-up   { color: var(--healthy); }
+    .trend-down { color: var(--critical); }
+    .trend-flat { color: var(--text-soft); }
+
+    /* QoQ */
+    .qoq-pos { color: var(--healthy); font-weight: 600; }
+    .qoq-neg { color: var(--critical); font-weight: 600; }
+
+    /* Detail panel */
+    .detail-panel {
+      display: none; position: fixed; top: 0; right: 0; width: 420px; height: 100vh;
+      background: white; box-shadow: -4px 0 24px rgba(0,0,0,.12);
+      overflow-y: auto; z-index: 500;
+    }
+    .detail-panel.open { display: block; }
+    .detail-header {
+      background: var(--green-deep); color: white; padding: 20px 20px 16px;
+      position: sticky; top: 0;
+    }
+    .detail-header h2 { font-size: 1rem; font-weight: 700; line-height: 1.3; }
+    .detail-header p { font-size: 0.78rem; opacity: 0.6; margin-top: 3px; }
+    .close-btn {
+      position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.15);
+      border: none; color: white; width: 28px; height: 28px; border-radius: 50%;
+      cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;
+    }
+    .detail-body { padding: 20px; }
+    .detail-section { margin-bottom: 24px; }
+    .detail-section h3 {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; color: var(--text-soft); margin-bottom: 12px;
+      padding-bottom: 6px; border-bottom: 1px solid var(--cream-dark);
+    }
+    .score-breakdown {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    }
+    .breakdown-item {
+      background: var(--cream); border-radius: 6px; padding: 12px;
+      text-align: center;
+    }
+    .breakdown-item .val { font-size: 1.6rem; font-weight: 700; line-height: 1; }
+    .breakdown-item .lbl { font-size: 0.7rem; color: var(--text-soft); margin-top: 3px; }
+    .history-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 0; border-bottom: 1px solid var(--cream-dark); font-size: 0.83rem;
+    }
+    .history-row:last-child { border-bottom: none; }
+    .history-date { color: var(--text-soft); font-size: 0.78rem; }
+
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.3); z-index: 499; }
+    .overlay.open { display: block; }
+
+    @media (max-width: 900px) {
+      .summary-inner { grid-template-columns: repeat(3, 1fr); }
+      .detail-panel  { width: 100%; }
+    }
+    @media (max-width: 600px) {
+      .summary-inner { grid-template-columns: repeat(2, 1fr); }
+      main { padding: 12px 12px 32px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+        <circle cx="20" cy="14" r="9" fill="#52b788" opacity="0.9"/>
+        <circle cx="10" cy="16" r="6" fill="#52b788" opacity="0.75"/>
+        <circle cx="30" cy="16" r="6" fill="#52b788" opacity="0.75"/>
+        <rect x="19" y="18" width="2" height="12" rx="1" fill="#c97d2e"/>
+      </svg>
+      <h1>Banyan</h1>
+    </div>
+    <p>Health Dashboard — restricted access</p>
+    <input type="password" id="pwd-input" placeholder="Enter password" autocomplete="current-password">
+    <button class="login-btn" id="login-btn">Sign in</button>
+    <p class="login-error" id="login-error">Incorrect password. Try again.</p>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div id="app">
+  <header>
+    <div class="header-inner">
+      <a class="logo" href="index.html">
+        <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+          <circle cx="20" cy="14" r="9" fill="#52b788" opacity="0.9"/>
+          <circle cx="10" cy="16" r="6" fill="#52b788" opacity="0.75"/>
+          <circle cx="30" cy="16" r="6" fill="#52b788" opacity="0.75"/>
+          <rect x="19" y="18" width="2" height="12" rx="1" fill="#c97d2e"/>
+        </svg>
+        <div>
+          <h1>Banyan</h1>
+          <span>South Asian Organization Directory</span>
+        </div>
+      </a>
+      <span class="header-badge">Health Dashboard</span>
+      <div class="header-right">
+        <span class="last-updated" id="last-updated"></span>
+        <button class="logout-btn" id="logout-btn">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Summary stats -->
+  <div class="summary-bar">
+    <div class="summary-inner">
+      <div class="stat-card">
+        <div class="stat-label">Total Orgs</div>
+        <div class="stat-value" id="stat-total">—</div>
+        <div class="stat-sub">in directory</div>
+      </div>
+      <div class="stat-card healthy">
+        <div class="stat-label">Healthy</div>
+        <div class="stat-value" id="stat-healthy">—</div>
+        <div class="stat-sub">score ≥ 75</div>
+      </div>
+      <div class="stat-card stable">
+        <div class="stat-label">Stable</div>
+        <div class="stat-value" id="stat-stable">—</div>
+        <div class="stat-sub">score 50–74</div>
+      </div>
+      <div class="stat-card at-risk">
+        <div class="stat-label">At Risk</div>
+        <div class="stat-value" id="stat-atrisk">—</div>
+        <div class="stat-sub">score 25–49</div>
+      </div>
+      <div class="stat-card critical">
+        <div class="stat-label">Critical</div>
+        <div class="stat-value" id="stat-critical">—</div>
+        <div class="stat-sub">score &lt; 25</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <div class="filter-inner">
+      <div class="search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="search" id="search" placeholder="Search organizations…">
+      </div>
+      <select class="filter-select" id="filter-tier">
+        <option value="">All tiers</option>
+        <option value="Healthy">Healthy</option>
+        <option value="Stable">Stable</option>
+        <option value="At Risk">At Risk</option>
+        <option value="Critical">Critical</option>
+        <option value="unscored">Unscored</option>
+      </select>
+      <select class="filter-select" id="filter-state">
+        <option value="">All states</option>
+      </select>
+      <select class="filter-select" id="filter-trend">
+        <option value="">All trends</option>
+        <option value="Improving">Improving ↑</option>
+        <option value="Stable">Stable →</option>
+        <option value="Declining">Declining ↓</option>
+      </select>
+      <span class="result-count" id="result-count"></span>
+    </div>
+  </div>
+
+  <main>
+    <div class="table-wrap">
+      <table id="main-table">
+        <thead>
+          <tr>
+            <th data-col="name">Organization <span class="sort-icon">↕</span></th>
+            <th data-col="health_score" class="sorted">Score <span class="sort-icon">↓</span></th>
+            <th data-col="health_tier">Tier <span class="sort-icon">↕</span></th>
+            <th>Sub-scores</th>
+            <th data-col="qoq_change">QoQ <span class="sort-icon">↕</span></th>
+            <th data-col="trend">Trend <span class="sort-icon">↕</span></th>
+            <th data-col="last_scored">Last Scored <span class="sort-icon">↕</span></th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-soft)">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- Detail panel -->
+<div class="overlay" id="overlay"></div>
+<div class="detail-panel" id="detail-panel">
+  <div class="detail-header">
+    <button class="close-btn" id="close-detail">×</button>
+    <h2 id="detail-name">—</h2>
+    <p id="detail-meta">—</p>
+  </div>
+  <div class="detail-body" id="detail-body"></div>
+</div>
+
+<script>
+// ── Password auth ─────────────────────────────────────────────
+const HASH = "687de17b316f2e5bc17418274fa064a1f7ce47b24723dc1e8b76cfb426c8db1b";
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+function checkAuth() {
+  return sessionStorage.getItem("banyan_auth") === "1";
+}
+
+document.getElementById("login-btn").addEventListener("click", tryLogin);
+document.getElementById("pwd-input").addEventListener("keydown", e => { if (e.key === "Enter") tryLogin(); });
+
+async function tryLogin() {
+  const pw = document.getElementById("pwd-input").value;
+  const h  = await sha256(pw);
+  if (h === HASH) {
+    sessionStorage.setItem("banyan_auth", "1");
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    loadData();
+  } else {
+    document.getElementById("login-error").style.display = "block";
+    document.getElementById("pwd-input").value = "";
+    document.getElementById("pwd-input").focus();
+  }
+}
+
+document.getElementById("logout-btn").addEventListener("click", () => {
+  sessionStorage.removeItem("banyan_auth");
+  location.reload();
+});
+
+if (checkAuth()) {
+  document.getElementById("login-screen").style.display = "none";
+  document.getElementById("app").style.display = "block";
+}
+
+// ── Data & state ──────────────────────────────────────────────
+let allOrgs = [];
+let sortCol = "health_score";
+let sortDir = -1; // -1 = desc
+
+const filters = { search: "", tier: "", state: "", trend: "" };
+
+// ── Load ──────────────────────────────────────────────────────
+async function loadData() {
+  try {
+    const res  = await fetch("./data/scores.json");
+    allOrgs = await res.json();
+    initFilters();
+    buildSummary();
+    render();
+    const dates = allOrgs.map(o => o.last_scored).filter(Boolean).sort().reverse();
+    if (dates.length) document.getElementById("last-updated").textContent = `Last scored: ${dates[0]}`;
+  } catch(e) {
+    document.getElementById("table-body").innerHTML =
+      `<tr><td colspan="7" style="text-align:center;padding:40px;color:red">${e.message}</td></tr>`;
+  }
+}
+
+function initFilters() {
+  const states = [...new Set(allOrgs.map(o => o.state).filter(Boolean))].sort();
+  const sel = document.getElementById("filter-state");
+  states.forEach(s => { const o = document.createElement("option"); o.value = o.textContent = s; sel.appendChild(o); });
+}
+
+function buildSummary() {
+  const counts = { Healthy: 0, Stable: 0, "At Risk": 0, Critical: 0 };
+  allOrgs.forEach(o => { if (o.health_tier && counts[o.health_tier] !== undefined) counts[o.health_tier]++; });
+  document.getElementById("stat-total").textContent   = allOrgs.length;
+  document.getElementById("stat-healthy").textContent  = counts.Healthy;
+  document.getElementById("stat-stable").textContent   = counts.Stable;
+  document.getElementById("stat-atrisk").textContent   = counts["At Risk"];
+  document.getElementById("stat-critical").textContent = counts.Critical;
+}
+
+// ── Filter & sort ─────────────────────────────────────────────
+function matchesFilters(o) {
+  if (filters.search) {
+    const q = filters.search.toLowerCase();
+    if (!((o.name || "").toLowerCase().includes(q) || (o.state || "").toLowerCase().includes(q))) return false;
+  }
+  if (filters.tier) {
+    if (filters.tier === "unscored") { if (o.health_tier) return false; }
+    else if (o.health_tier !== filters.tier) return false;
+  }
+  if (filters.state  && o.state !== filters.state) return false;
+  if (filters.trend  && o.trend !== filters.trend) return false;
+  return true;
+}
+
+function sortedOrgs(orgs) {
+  return [...orgs].sort((a, b) => {
+    let av = a[sortCol], bv = b[sortCol];
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    if (typeof av === "string") av = av.toLowerCase(), bv = (bv || "").toLowerCase();
+    return sortDir * (av < bv ? -1 : av > bv ? 1 : 0);
+  });
+}
+
+// ── Render ────────────────────────────────────────────────────
+function render() {
+  const visible = sortedOrgs(allOrgs.filter(matchesFilters));
+  document.getElementById("result-count").textContent = `${visible.length} of ${allOrgs.length} orgs`;
+
+  const tbody = document.getElementById("table-body");
+  if (!visible.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-soft)">No organizations match the current filters.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = "";
+  visible.forEach(org => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = buildRow(org);
+    tr.addEventListener("click", () => openDetail(org));
+    tbody.appendChild(tr);
+  });
+}
+
+function buildRow(o) {
+  const score = o.health_score != null ? Math.round(o.health_score) : null;
+  const tierKey = (o.health_tier || "").replace(/\s+/g, "-");
+  const tierBadge = o.health_tier
+    ? `<span class="tier-badge tier-${tierKey}">${o.health_tier}</span>`
+    : `<span class="tier-badge tier-none">Unscored</span>`;
+
+  const scoreColor = tierColor(o.health_tier);
+  const scoreCell = score != null
+    ? `<div class="score-cell">
+        <span class="score-num" style="color:${scoreColor}">${score}</span>
+        <div class="score-bar-wrap"><div class="score-bar" style="width:${score}%;background:${scoreColor}"></div></div>
+       </div>`
+    : `<span style="color:var(--text-soft)">—</span>`;
+
+  const sub = `<div class="sub-scores">
+    ${subScore("P", o.presence_score)}
+    ${subScore("A", o.activity_score)}
+    ${subScore("R", o.reach_score)}
+    ${subScore("F", o.financial_score)}
+  </div>`;
+
+  const qoq = o.qoq_change != null
+    ? `<span class="${o.qoq_change >= 0 ? "qoq-pos" : "qoq-neg"}">${o.qoq_change >= 0 ? "+" : ""}${Math.round(o.qoq_change * 10) / 10}</span>`
+    : "—";
+
+  const trend = trendIcon(o.trend);
+  const date  = o.last_scored ? o.last_scored.slice(0, 10) : "—";
+
+  return `
+    <td><div class="org-name">${esc(o.name)}</div><div class="org-state">${esc(o.state || "")}</div></td>
+    <td>${scoreCell}</td>
+    <td>${tierBadge}</td>
+    <td>${sub}</td>
+    <td>${qoq}</td>
+    <td>${trend}</td>
+    <td style="color:var(--text-soft);font-size:0.8rem">${date}</td>
+  `;
+}
+
+function subScore(label, val) {
+  const v = val != null ? Math.round(val) : "—";
+  return `<div class="sub"><div class="sub-label">${label}</div><div class="sub-val">${v}</div></div>`;
+}
+
+function trendIcon(trend) {
+  if (!trend) return `<span style="color:var(--text-soft)">—</span>`;
+  if (trend === "Improving") return `<span class="trend-up">↑ Improving</span>`;
+  if (trend === "Declining") return `<span class="trend-down">↓ Declining</span>`;
+  return `<span class="trend-flat">→ Stable</span>`;
+}
+
+function tierColor(tier) {
+  if (tier === "Healthy")  return "var(--healthy)";
+  if (tier === "Stable")   return "var(--stable)";
+  if (tier === "At Risk")  return "var(--at-risk)";
+  if (tier === "Critical") return "var(--critical)";
+  return "var(--text-soft)";
+}
+
+// ── Detail panel ──────────────────────────────────────────────
+function openDetail(o) {
+  const score = o.health_score != null ? Math.round(o.health_score) : "—";
+  const tierKey = (o.health_tier || "").replace(/\s+/g, "-");
+  const tierBadge = o.health_tier
+    ? `<span class="tier-badge tier-${tierKey}">${o.health_tier}</span>`
+    : `<span class="tier-badge tier-none">Unscored</span>`;
+
+  document.getElementById("detail-name").textContent = o.name;
+  document.getElementById("detail-meta").textContent  = [o.scope, o.state].filter(Boolean).join(" · ");
+
+  const history = (o.history || []).map(h => {
+    const s = h.total_score != null ? Math.round(h.total_score) : "—";
+    const qStr = h.qoq_change != null
+      ? `<span class="${h.qoq_change >= 0 ? "qoq-pos" : "qoq-neg"}">${h.qoq_change >= 0 ? "+" : ""}${Math.round(h.qoq_change * 10)/10}</span>`
+      : "";
+    const tierK = (h.health_tier || "").replace(/\s+/g, "-");
+    const tBadge = h.health_tier ? `<span class="tier-badge tier-${tierK}">${h.health_tier}</span>` : "";
+    return `<div class="history-row">
+      <span class="history-date">${h.scored_on || ""}</span>
+      ${tBadge}
+      <strong style="color:${tierColor(h.health_tier)}">${s}</strong>
+      ${qStr}
+    </div>`;
+  }).join("") || `<p style="color:var(--text-soft);font-size:0.83rem">No score history yet.</p>`;
+
+  document.getElementById("detail-body").innerHTML = `
+    <div class="detail-section">
+      <h3>Current Score</h3>
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">
+        <span style="font-size:3rem;font-weight:800;color:${tierColor(o.health_tier)};line-height:1">${score}</span>
+        ${tierBadge}
+      </div>
+      <div class="score-breakdown">
+        ${breakdownItem(o.presence_score,  "Presence",  "25 pts")}
+        ${breakdownItem(o.activity_score,  "Activity",  "30 pts")}
+        ${breakdownItem(o.reach_score,     "Reach",     "25 pts")}
+        ${breakdownItem(o.financial_score, "Financial", "20 pts")}
+      </div>
+    </div>
+    <div class="detail-section">
+      <h3>Score History</h3>
+      ${history}
+    </div>
+  `;
+
+  document.getElementById("detail-panel").classList.add("open");
+  document.getElementById("overlay").classList.add("open");
+}
+
+function breakdownItem(val, label, max) {
+  const v = val != null ? Math.round(val) : "—";
+  return `<div class="breakdown-item">
+    <div class="val">${v}</div>
+    <div class="lbl">${label}</div>
+    <div style="font-size:0.65rem;color:var(--text-soft);margin-top:1px">max ${max}</div>
+  </div>`;
+}
+
+function closeDetail() {
+  document.getElementById("detail-panel").classList.remove("open");
+  document.getElementById("overlay").classList.remove("open");
+}
+document.getElementById("close-detail").addEventListener("click", closeDetail);
+document.getElementById("overlay").addEventListener("click", closeDetail);
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeDetail(); });
+
+// ── Sorting ───────────────────────────────────────────────────
+document.querySelectorAll("thead th[data-col]").forEach(th => {
+  th.addEventListener("click", () => {
+    const col = th.dataset.col;
+    if (sortCol === col) { sortDir *= -1; }
+    else { sortCol = col; sortDir = col === "name" ? 1 : -1; }
+    document.querySelectorAll("thead th").forEach(t => t.classList.remove("sorted"));
+    th.classList.add("sorted");
+    th.querySelector(".sort-icon").textContent = sortDir === 1 ? "↑" : "↓";
+    render();
+  });
+});
+
+// ── Filter wiring ─────────────────────────────────────────────
+document.getElementById("search").addEventListener("input", e => { filters.search = e.target.value.trim(); render(); });
+document.getElementById("filter-tier").addEventListener("change", e => { filters.tier = e.target.value; render(); });
+document.getElementById("filter-state").addEventListener("change", e => { filters.state = e.target.value; render(); });
+document.getElementById("filter-trend").addEventListener("change", e => { filters.trend = e.target.value; render(); });
+
+function esc(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+// Auto-load if already authenticated
+if (checkAuth()) loadData();
+</script>
+</body>
+</html>
