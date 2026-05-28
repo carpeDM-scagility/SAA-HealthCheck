@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Banyan — South Asian Organization Directory</title>
+  <meta name="description" content="Discover South Asian American organizations across the United States. Find community groups, advocacy organizations, cultural associations, and service providers.">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green-deep:  #1a4731;
+      --green-mid:   #2d6a4f;
+      --green-light: #52b788;
+      --amber:       #c97d2e;
+      --amber-light: #f0a854;
+      --cream:       #faf8f5;
+      --cream-dark:  #f0ece6;
+      --text-dark:   #1a2633;
+      --text-mid:    #4a5568;
+      --text-soft:   #718096;
+      --border:      #ddd8d0;
+      --white:       #ffffff;
+      --shadow-sm:   0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+      --shadow-md:   0 4px 12px rgba(0,0,0,.1);
+      --radius:      10px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--cream);
+      color: var(--text-dark);
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--green-deep);
+      color: white;
+      padding: 0 24px;
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 0 18px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
+    }
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+    }
+    .logo-text h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    .logo-text span {
+      font-size: 0.78rem;
+      opacity: 0.7;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    .header-tagline {
+      margin-left: auto;
+      font-size: 0.85rem;
+      opacity: 0.65;
+      display: none;
+    }
+    @media (min-width: 640px) { .header-tagline { display: block; } }
+
+    /* ── FILTER BAR ── */
+    .filter-bar {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+    .filter-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 12px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .search-wrap {
+      flex: 1;
+      min-width: 200px;
+      position: relative;
+    }
+    .search-wrap svg {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-soft);
+      pointer-events: none;
+    }
+    input[type="search"] {
+      width: 100%;
+      padding: 8px 12px 8px 34px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      background: var(--cream);
+      color: var(--text-dark);
+      outline: none;
+      transition: border-color .15s;
+    }
+    input[type="search"]:focus { border-color: var(--green-mid); background: white; }
+
+    select.filter-select {
+      padding: 8px 28px 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      background: var(--cream);
+      color: var(--text-dark);
+      cursor: pointer;
+      outline: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+    }
+    select.filter-select:focus { border-color: var(--green-mid); }
+
+    /* Multi-select dropdown */
+    .multi-wrap {
+      position: relative;
+    }
+    .multi-btn {
+      padding: 8px 28px 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      background: var(--cream);
+      color: var(--text-dark);
+      cursor: pointer;
+      white-space: nowrap;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      user-select: none;
+      border-right-width: 1px;
+    }
+    .multi-btn.active {
+      border-color: var(--green-mid);
+      background-color: white;
+      color: var(--green-deep);
+      font-weight: 600;
+    }
+    .multi-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      min-width: 240px;
+      max-height: 320px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: var(--shadow-md);
+      overflow-y: auto;
+      z-index: 200;
+    }
+    .multi-dropdown.open { display: block; }
+    .multi-search {
+      padding: 8px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: white;
+    }
+    .multi-search input {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 0.82rem;
+      outline: none;
+    }
+    .multi-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .multi-option:hover { background: var(--cream); }
+    .multi-option.selected { background: #f0f9f4; color: var(--green-deep); }
+    .multi-option input[type="checkbox"] { accent-color: var(--green-mid); }
+
+    .result-count {
+      margin-left: auto;
+      font-size: 0.82rem;
+      color: var(--text-soft);
+      white-space: nowrap;
+    }
+
+    /* Active filter chips */
+    .active-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 0 24px 10px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .active-filters:empty { display: none; }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      background: #e8f4ed;
+      color: var(--green-deep);
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 500;
+    }
+    .chip button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--green-mid);
+      padding: 0;
+      line-height: 1;
+      font-size: 14px;
+    }
+    .clear-all {
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      cursor: pointer;
+      text-decoration: underline;
+      align-self: center;
+      background: none;
+      border: none;
+    }
+
+    /* ── MAIN GRID ── */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 24px 48px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 18px;
+    }
+
+    /* ── ORG CARD ── */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border);
+      transition: box-shadow .15s, transform .15s;
+    }
+    .card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    .card-body { padding: 18px 18px 14px; flex: 1; }
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .scope-badge {
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 2px 7px;
+      border-radius: 3px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .scope-National     { background: #dbeafe; color: #1e40af; }
+    .scope-Regional     { background: #d1fae5; color: #065f46; }
+    .scope-Metropolitan { background: #fef3c7; color: #92400e; }
+    .scope-Local        { background: #fef3c7; color: #92400e; }
+
+    .year-badge {
+      font-size: 0.72rem;
+      color: var(--text-soft);
+    }
+
+    .card-name {
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      line-height: 1.3;
+      margin-bottom: 4px;
+    }
+    .card-location {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.8rem;
+      color: var(--text-soft);
+      margin-bottom: 10px;
+    }
+    .card-description {
+      font-size: 0.84rem;
+      color: var(--text-mid);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .tag-row {
+      margin-bottom: 8px;
+    }
+    .tag-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-soft);
+      margin-bottom: 4px;
+    }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .tag {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: opacity .1s;
+    }
+    .tag:hover { opacity: 0.75; }
+    .tag-community { background: #ede9fe; color: #5b21b6; }
+    .tag-service   { background: #fce7f3; color: #9d174d; }
+    .tag-more      { background: var(--cream-dark); color: var(--text-soft); cursor: default; }
+
+    /* ── CARD FOOTER ── */
+    .card-footer {
+      padding: 10px 18px 12px;
+      border-top: 1px solid var(--cream-dark);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .contact-links {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex: 1;
+    }
+    .contact-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 5px;
+      background: var(--cream);
+      color: var(--text-mid);
+      text-decoration: none;
+      transition: background .1s, color .1s;
+    }
+    .contact-link:hover { background: var(--green-deep); color: white; }
+    .contact-link svg { width: 14px; height: 14px; }
+
+    .membership-badge {
+      font-size: 0.7rem;
+      color: var(--amber);
+      font-weight: 600;
+      margin-left: auto;
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 64px 24px;
+      color: var(--text-soft);
+    }
+    .empty h3 { font-size: 1.1rem; margin-bottom: 8px; color: var(--text-mid); }
+    .empty p  { font-size: 0.9rem; }
+
+    /* ── LOADING ── */
+    .loading {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 64px;
+      color: var(--text-soft);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 0.8rem;
+      color: var(--text-soft);
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--green-mid); text-decoration: none; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .filter-inner { padding: 10px 16px; }
+      main { padding: 16px 16px 40px; }
+      .grid { grid-template-columns: 1fr; gap: 12px; }
+      .result-count { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a class="logo" href="#">
+      <svg class="logo-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Banyan tree silhouette -->
+        <circle cx="20" cy="14" r="9" fill="#52b788" opacity="0.9"/>
+        <circle cx="10" cy="16" r="6" fill="#52b788" opacity="0.75"/>
+        <circle cx="30" cy="16" r="6" fill="#52b788" opacity="0.75"/>
+        <circle cx="14" cy="22" r="5" fill="#40916c" opacity="0.7"/>
+        <circle cx="26" cy="22" r="5" fill="#40916c" opacity="0.7"/>
+        <rect x="19" y="18" width="2" height="12" rx="1" fill="#c97d2e"/>
+        <rect x="10" y="28" width="20" height="2" rx="1" fill="#c97d2e" opacity="0.7"/>
+        <!-- Aerial roots -->
+        <rect x="12" y="22" width="1.5" height="8" rx="0.75" fill="#c97d2e" opacity="0.6"/>
+        <rect x="26.5" y="22" width="1.5" height="8" rx="0.75" fill="#c97d2e" opacity="0.6"/>
+      </svg>
+      <div class="logo-text">
+        <h1>Banyan</h1>
+        <span>South Asian Organization Directory</span>
+      </div>
+    </a>
+    <p class="header-tagline">Connecting the diaspora · United States</p>
+  </div>
+</header>
+
+<div class="filter-bar">
+  <div class="filter-inner">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="search" id="search" placeholder="Search organizations…" autocomplete="off">
+    </div>
+
+    <select class="filter-select" id="filter-state">
+      <option value="">All states</option>
+    </select>
+
+    <div class="multi-wrap">
+      <div class="multi-btn" id="btn-communities" tabindex="0">Communities ▾</div>
+      <div class="multi-dropdown" id="dd-communities">
+        <div class="multi-search"><input type="text" placeholder="Search communities…" id="search-communities"></div>
+        <div id="list-communities"></div>
+      </div>
+    </div>
+
+    <div class="multi-wrap">
+      <div class="multi-btn" id="btn-services" tabindex="0">Services ▾</div>
+      <div class="multi-dropdown" id="dd-services">
+        <div class="multi-search"><input type="text" placeholder="Search services…" id="search-services"></div>
+        <div id="list-services"></div>
+      </div>
+    </div>
+
+    <span class="result-count" id="result-count"></span>
+  </div>
+  <div class="active-filters" id="active-filters"></div>
+</div>
+
+<main>
+  <div class="grid" id="grid">
+    <div class="loading">Loading organizations…</div>
+  </div>
+</main>
+
+<footer>
+  <p>
+    Banyan is a community resource — data sourced from public records and organizational websites.
+    Know of an org that's missing? <a href="mailto:dm1973@gmail.com">Let us know.</a>
+  </p>
+</footer>
+
+<script>
+// ── State ─────────────────────────────────────────────────────
+let allOrgs = [];
+let filters = {
+  search: "",
+  state: "",
+  communities: new Set(),
+  services: new Set(),
+};
+
+// ── Data loading ──────────────────────────────────────────────
+async function loadData() {
+  try {
+    const [orgsRes, metaRes] = await Promise.all([
+      fetch("./data/orgs.json"),
+      fetch("./data/meta.json"),
+    ]);
+    allOrgs = await orgsRes.json();
+    const meta = await metaRes.json();
+    initFilters(meta);
+    render();
+  } catch (e) {
+    document.getElementById("grid").innerHTML =
+      `<div class="empty"><h3>Unable to load data</h3><p>${e.message}</p></div>`;
+  }
+}
+
+// ── Filter initialization ─────────────────────────────────────
+function initFilters(meta) {
+  // State dropdown
+  const stateEl = document.getElementById("filter-state");
+  meta.states.forEach(s => {
+    const opt = document.createElement("option");
+    opt.value = s;
+    opt.textContent = s;
+    stateEl.appendChild(opt);
+  });
+
+  // Multi-selects
+  buildMulti("communities", meta.communities, "tag-community");
+  buildMulti("services", meta.services, "tag-service");
+}
+
+function buildMulti(key, items, tagClass) {
+  const list = document.getElementById(`list-${key}`);
+  items.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "multi-option";
+    div.dataset.value = item;
+    div.innerHTML = `<input type="checkbox"><span>${item}</span>`;
+    div.addEventListener("click", () => toggleMulti(key, item, div));
+    list.appendChild(div);
+  });
+
+  // Search within dropdown
+  document.getElementById(`search-${key}`).addEventListener("input", e => {
+    const q = e.target.value.toLowerCase();
+    list.querySelectorAll(".multi-option").forEach(opt => {
+      opt.style.display = opt.dataset.value.toLowerCase().includes(q) ? "" : "none";
+    });
+  });
+}
+
+function toggleMulti(key, value, el) {
+  const set = filters[key];
+  const cb = el.querySelector("input");
+  if (set.has(value)) {
+    set.delete(value);
+    el.classList.remove("selected");
+    cb.checked = false;
+  } else {
+    set.add(value);
+    el.classList.add("selected");
+    cb.checked = true;
+  }
+  updateBtn(key);
+  renderActiveFilters();
+  render();
+}
+
+function updateBtn(key) {
+  const count = filters[key].size;
+  const btn = document.getElementById(`btn-${key}`);
+  const label = key.charAt(0).toUpperCase() + key.slice(1);
+  btn.textContent = count ? `${label} (${count}) ▾` : `${label} ▾`;
+  btn.classList.toggle("active", count > 0);
+}
+
+// ── Dropdown open/close ───────────────────────────────────────
+["communities", "services"].forEach(key => {
+  const btn = document.getElementById(`btn-${key}`);
+  const dd  = document.getElementById(`dd-${key}`);
+  btn.addEventListener("click", e => {
+    e.stopPropagation();
+    const isOpen = dd.classList.contains("open");
+    closeAllDropdowns();
+    if (!isOpen) dd.classList.add("open");
+  });
+});
+document.addEventListener("click", closeAllDropdowns);
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeAllDropdowns(); });
+function closeAllDropdowns() {
+  document.querySelectorAll(".multi-dropdown.open").forEach(d => d.classList.remove("open"));
+}
+
+// ── Active filter chips ───────────────────────────────────────
+function renderActiveFilters() {
+  const container = document.getElementById("active-filters");
+  container.innerHTML = "";
+  const chips = [];
+
+  if (filters.state) {
+    chips.push(createChip(`State: ${filters.state}`, () => {
+      filters.state = "";
+      document.getElementById("filter-state").value = "";
+      renderActiveFilters(); render();
+    }));
+  }
+  filters.communities.forEach(c => {
+    chips.push(createChip(c, () => {
+      const el = document.querySelector(`#list-communities [data-value="${CSS.escape(c)}"]`);
+      if (el) toggleMulti("communities", c, el);
+    }));
+  });
+  filters.services.forEach(s => {
+    chips.push(createChip(s, () => {
+      const el = document.querySelector(`#list-services [data-value="${CSS.escape(s)}"]`);
+      if (el) toggleMulti("services", s, el);
+    }));
+  });
+
+  if (chips.length > 1) {
+    const clearBtn = document.createElement("button");
+    clearBtn.className = "clear-all";
+    clearBtn.textContent = "Clear all";
+    clearBtn.addEventListener("click", clearAllFilters);
+    chips.push(clearBtn);
+  }
+
+  chips.forEach(c => container.appendChild(c));
+}
+
+function createChip(label, onRemove) {
+  const div = document.createElement("div");
+  div.className = "chip";
+  div.innerHTML = `<span>${label}</span><button title="Remove">×</button>`;
+  div.querySelector("button").addEventListener("click", onRemove);
+  return div;
+}
+
+function clearAllFilters() {
+  filters.search = "";
+  filters.state = "";
+  filters.communities.clear();
+  filters.services.clear();
+  document.getElementById("search").value = "";
+  document.getElementById("filter-state").value = "";
+  document.querySelectorAll(".multi-option.selected").forEach(el => {
+    el.classList.remove("selected");
+    el.querySelector("input").checked = false;
+  });
+  updateBtn("communities");
+  updateBtn("services");
+  renderActiveFilters();
+  render();
+}
+
+// ── Filter logic ──────────────────────────────────────────────
+function matchesFilters(org) {
+  if (filters.search) {
+    const q = filters.search.toLowerCase();
+    const haystack = [org.name, org.description, org.service_area].filter(Boolean).join(" ").toLowerCase();
+    if (!haystack.includes(q)) return false;
+  }
+  if (filters.state && org.state !== filters.state) return false;
+  if (filters.communities.size) {
+    const orgComm = new Set(org.communities_served || []);
+    if (![...filters.communities].some(c => orgComm.has(c))) return false;
+  }
+  if (filters.services.size) {
+    const orgSvc = new Set(org.services || []);
+    if (![...filters.services].some(s => orgSvc.has(s))) return false;
+  }
+  return true;
+}
+
+// ── Render ────────────────────────────────────────────────────
+function render() {
+  const grid = document.getElementById("grid");
+  const visible = allOrgs.filter(matchesFilters);
+  document.getElementById("result-count").textContent =
+    `${visible.length} of ${allOrgs.length} organizations`;
+
+  if (!visible.length) {
+    grid.innerHTML = `<div class="empty">
+      <h3>No organizations found</h3>
+      <p>Try adjusting your filters or search term.</p>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = "";
+  visible.forEach(org => grid.appendChild(buildCard(org)));
+}
+
+function buildCard(org) {
+  const card = document.createElement("div");
+  card.className = "card";
+
+  const scopeKey = (org.scope_of_service || "").replace(/\s*\/.*/, "").replace(/\s+/g, "");
+  const scopeHTML = org.scope_of_service
+    ? `<span class="scope-badge scope-${scopeKey}">${org.scope_of_service}</span>`
+    : "";
+  const yearHTML = org.year_founded
+    ? `<span class="year-badge">Est. ${org.year_founded}</span>`
+    : "";
+
+  const loc = [org.service_area, org.state].filter(Boolean).join(", ");
+  const locHTML = loc
+    ? `<div class="card-location"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>${escHtml(loc)}</div>`
+    : "";
+
+  const descHTML = org.description
+    ? `<p class="card-description">${escHtml(org.description)}</p>`
+    : "";
+
+  const communities = org.communities_served || [];
+  const commHTML = communities.length ? buildTagRow("Communities", communities, "tag-community", "communities") : "";
+
+  const services = org.services || [];
+  const svcHTML = services.length ? buildTagRow("Services", services, "tag-service", "services") : "";
+
+  // Contact links
+  const links = [];
+  if (org.website_url)  links.push(link(org.website_url, icons.web, "Website"));
+  if (org.email)        links.push(link(`mailto:${org.email}`, icons.email, "Email"));
+  if (org.facebook_url) links.push(link(org.facebook_url, icons.facebook, "Facebook"));
+  if (org.instagram_url)links.push(link(org.instagram_url, icons.instagram, "Instagram"));
+  if (org.twitter_url)  links.push(link(org.twitter_url, icons.twitter, "X / Twitter"));
+
+  const memberHTML = org.has_membership
+    ? `<span class="membership-badge">Members</span>` : "";
+
+  card.innerHTML = `
+    <div class="card-body">
+      <div class="card-top">${scopeHTML}${yearHTML}</div>
+      <div class="card-name">${escHtml(org.name)}</div>
+      ${locHTML}
+      ${descHTML}
+      ${commHTML}
+      ${svcHTML}
+    </div>
+    <div class="card-footer">
+      <div class="contact-links">${links.join("")}</div>
+      ${memberHTML}
+    </div>
+  `;
+  return card;
+}
+
+function buildTagRow(label, items, cls, filterKey) {
+  const max = 4;
+  const shown = items.slice(0, max);
+  const extra = items.length - max;
+  const tags = shown.map(t =>
+    `<span class="tag ${cls}" data-filter="${filterKey}" data-value="${escHtml(t)}">${escHtml(t)}</span>`
+  ).join("");
+  const more = extra > 0 ? `<span class="tag tag-more">+${extra}</span>` : "";
+  return `<div class="tag-row">
+    <div class="tag-label">${label}</div>
+    <div class="tags">${tags}${more}</div>
+  </div>`;
+}
+
+function link(href, svgIcon, title) {
+  return `<a class="contact-link" href="${escHtml(href)}" target="_blank" rel="noopener" title="${title}">${svgIcon}</a>`;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+const icons = {
+  web: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+  email: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`,
+  facebook: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>`,
+  instagram: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>`,
+  twitter: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`,
+};
+
+// ── Click tag to filter ───────────────────────────────────────
+document.getElementById("grid").addEventListener("click", e => {
+  const tag = e.target.closest(".tag[data-filter]");
+  if (!tag) return;
+  const key   = tag.dataset.filter;
+  const value = tag.dataset.value;
+  const el = document.querySelector(`#list-${key} [data-value="${CSS.escape(value)}"]`);
+  if (el && !filters[key].has(value)) toggleMulti(key, value, el);
+});
+
+// ── Event wiring ──────────────────────────────────────────────
+document.getElementById("search").addEventListener("input", e => {
+  filters.search = e.target.value.trim();
+  render();
+});
+
+document.getElementById("filter-state").addEventListener("change", e => {
+  filters.state = e.target.value;
+  renderActiveFilters();
+  render();
+});
+
+// ── Boot ──────────────────────────────────────────────────────
+loadData();
+</script>
+</body>
+</html>
