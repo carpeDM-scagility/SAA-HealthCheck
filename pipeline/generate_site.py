@@ -26,16 +26,13 @@ import requests
 
 log = logging.getLogger(__name__)
 
-# Public fields only — no EIN, health scores, budget, or pipeline internals
+# Public fields only — no EIN, health scores, budget, pipeline internals,
+# or contact info (email/website/social are fetched on-demand via anon key
+# to prevent bulk scraping of the contact database)
 PUBLIC_FIELDS = ",".join([
     "id",
     "name",
     "description",
-    "website_url",
-    "email",
-    "twitter_url",
-    "facebook_url",
-    "instagram_url",
     "state",
     "service_area",
     "scope_of_service",
@@ -233,8 +230,9 @@ def write_json(path: Path, data) -> None:
 def run(output_dir: str = "../docs/data") -> None:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
-    sb_url = os.environ.get("SUPABASE_URL", "")
-    sb_key = os.environ.get("SUPABASE_KEY", "")
+    sb_url      = os.environ.get("SUPABASE_URL", "")
+    sb_key      = os.environ.get("SUPABASE_KEY", "")
+    sb_anon_key = os.environ.get("SUPABASE_ANON_KEY", "")
     if not sb_url or not sb_key:
         log.error("Set SUPABASE_URL and SUPABASE_KEY env vars.")
         sys.exit(1)
@@ -256,6 +254,10 @@ def run(output_dir: str = "../docs/data") -> None:
     write_json(out / "orgs.json", orgs)
     write_json(out / "meta.json", meta)
     write_json(out / "scores.json", scores)
+    write_json(out / "config.json", {
+        "supabase_url":     sb_url,
+        "supabase_anon_key": sb_anon_key,
+    })
 
     scored = sum(1 for s in scores if s.get("health_score") is not None)
     log.info(
