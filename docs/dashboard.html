@@ -544,6 +544,7 @@ async function tryLogin() {
   const h  = await sha256(pw);
   if (h === HASH) {
     sessionStorage.setItem("banyan_auth", "1");
+    sessionStorage.setItem("banyan_token", pw); // used as Edge Function auth token
     document.getElementById("login-screen").style.display = "none";
     document.getElementById("app").style.display = "block";
     init();
@@ -556,6 +557,7 @@ async function tryLogin() {
 
 document.getElementById("logout-btn").addEventListener("click", () => {
   sessionStorage.removeItem("banyan_auth");
+  sessionStorage.removeItem("banyan_token");
   location.reload();
 });
 
@@ -846,6 +848,23 @@ function gatherOrgData(subId) {
   return data;
 }
 
+// ── Edge Function call (approve / reject) ─────────────────────
+// All writes to organizations and pending_submissions go through
+// the server-side Edge Function, which uses the service role key.
+// The anon key (public) no longer has write access to these tables.
+async function callReviewFn(action, subId, orgData, reviewerNotes) {
+  const token   = sessionStorage.getItem("banyan_token") || "";
+  const fnUrl   = SB_URL.replace(/\/$/, "") + "/functions/v1/review-submission";
+  const res = await fetch(fnUrl, {
+    method:  "POST",
+    headers: { "Content-Type": "application/json", "apikey": SB_ANON },
+    body: JSON.stringify({ token, action, sub_id: subId, org_data: orgData, reviewer_notes: reviewerNotes }),
+  });
+  const body = await res.json();
+  if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
+  return body;
+}
+
 // ── Approve submission ─────────────────────────────────────────
 async function approveSub(id, type, orgId) {
   const approveBtn = document.getElementById(`approve-btn-${id}`);
@@ -857,17 +876,7 @@ async function approveSub(id, type, orgId) {
 
   try {
     const orgData = gatherOrgData(id);
-
-    if (type === "new_org") {
-      await sbCall("POST", "organizations", orgData);
-    } else if (type === "edit_org" && orgId) {
-      await sbCall("PATCH", `organizations?id=eq.${orgId}`, orgData);
-    }
-
-    const patch = { status: "approved", reviewed_at: new Date().toISOString() };
-    if (reviewerNotes) patch.reviewer_notes = reviewerNotes;
-    await sbCall("PATCH", `pending_submissions?id=eq.${id}`, patch);
-
+    await callReviewFn("approve", id, orgData, reviewerNotes);
     removeCard(id);
     showToast("Approved and saved to directory ✓", false);
     allPending = allPending.filter(s => s.id !== id);
@@ -889,10 +898,7 @@ async function rejectSub(id) {
   const reviewerNotes = (document.getElementById(`rev-notes-${id}`) || {}).value || null;
 
   try {
-    const patch = { status: "rejected", reviewed_at: new Date().toISOString() };
-    if (reviewerNotes) patch.reviewer_notes = reviewerNotes;
-    await sbCall("PATCH", `pending_submissions?id=eq.${id}`, patch);
-
+    await callReviewFn("reject", id, null, reviewerNotes);
     removeCard(id);
     showToast("Submission rejected", false);
     allPending = allPending.filter(s => s.id !== id);
