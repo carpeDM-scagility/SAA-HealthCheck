@@ -648,7 +648,7 @@ async function loadPending() {
   try {
     const rows = await sbCall(
       "GET",
-      "pending_submissions?status=eq.pending&order=created_at.desc&limit=200",
+      "pending_submissions?status=eq.pending&order=created_at.desc&limit=2000",
       null
     );
     allPending = rows;
