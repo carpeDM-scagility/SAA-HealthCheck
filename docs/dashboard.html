@@ -582,11 +582,37 @@ if (checkAuth()) {
 let SB_URL  = "";
 let SB_ANON = "";
 
+// Canonical taxonomy — single source of truth for the dashboard.
+// Loaded from meta.json (which is generated from live Supabase data);
+// falls back to these hardcoded values if meta.json isn't available.
+const CANONICAL_COMMUNITIES = [
+  "Pan-South Asian","Indian American","Pakistani American",
+  "Bangladeshi American","Sri Lankan American","Nepali American",
+  "Tamil","Telugu","Gujarati","Punjabi","Bengali","Malayali",
+  "Kannada","Marathi","Odia","Sindhi","Kashmiri",
+  "Sikh","Hindu","Muslim","Tibetan-American",
+];
+const CANONICAL_SERVICES = [
+  "Advocacy & Civic Engagement","Arts & Culture","Business & Professional",
+  "Community Building","Education","Health & Wellness","Legal Aid",
+  "Media & Communications","Religious & Spiritual","Social Services",
+  "Sports & Recreation","Women & Gender","Youth & Students",
+  "Immigration & Refugee Services","LGBTQ+",
+];
+let META_COMMUNITIES = [...CANONICAL_COMMUNITIES];
+let META_SERVICES    = [...CANONICAL_SERVICES];
+
 async function loadConfig() {
   try {
-    const cfg = await fetch("./data/config.json").then(r => r.json());
-    SB_URL  = cfg.supabase_url  || "";
-    SB_ANON = cfg.supabase_anon_key || "";
+    const [cfg, meta] = await Promise.all([
+      fetch("./data/config.json").then(r => r.json()),
+      fetch("./data/meta.json").then(r => r.json()).catch(() => ({})),
+    ]);
+    SB_URL  = cfg.supabase_url       || "";
+    SB_ANON = cfg.supabase_anon_key  || "";
+    // Use live meta values if available, otherwise keep canonical fallbacks
+    if (meta.communities?.length) META_COMMUNITIES = meta.communities;
+    if (meta.services?.length)    META_SERVICES    = meta.services;
   } catch (_) { /* config not yet generated */ }
 }
 
@@ -730,11 +756,14 @@ function buildSubCard(s) {
 
   const scopeField = { key: "scope_of_service", label: "Scope", type: "scope" };
   const membershipField = { key: "has_membership", label: "Has Membership?", type: "boolean" };
-  const servicesField = { key: "services", label: "Services (comma-separated)", type: "array" };
-  const communitiesField = { key: "communities_served", label: "Communities Served (comma-separated)", type: "array" };
+  const servicesField = { key: "services", label: "Services", type: "array" };
+  const communitiesField = { key: "communities_served", label: "Communities Served", type: "array" };
 
+  // Always show services + communities so reviewers can add/correct even when Claude returned nothing.
+  const alwaysShow = new Set(["services", "communities_served"]);
   const allFields = [...textFields, scopeField, membershipField, servicesField, communitiesField];
   const populated = allFields.filter(f => {
+    if (alwaysShow.has(f.key)) return true;
     const v = s[f.key];
     if (v == null) return false;
     if (Array.isArray(v) && v.length === 0) return false;
@@ -790,10 +819,23 @@ function buildFieldInput(subId, field, value) {
   }
 
   if (field.type === "array") {
-    const arr = Array.isArray(value) ? value : [];
-    return `<div class="field-item" style="grid-column:1/-1">
-      <label class="field-label" for="${id}">${esc(field.label)}</label>
-      <input type="text" class="field-input" id="${id}" value="${esc(arr.join(", "))}">
+    // Normalise existing values to lowercase for comparison so Claude's variant
+    // spellings still pre-check the right box (e.g. "Odiya" → checks "Odia").
+    const raw = Array.isArray(value) ? value : [];
+    const existing = new Set(raw.map(v => v.trim().toLowerCase()));
+    const options  = field.key === "services" ? META_SERVICES : META_COMMUNITIES;
+    const boxes = options.map(opt => {
+      const checked = existing.has(opt.toLowerCase()) ? "checked" : "";
+      return `<label style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:0.78rem;cursor:pointer;line-height:1.3;">
+        <input type="checkbox" value="${esc(opt)}" ${checked} style="accent-color:#2d6a4f;flex-shrink:0;">
+        <span>${esc(opt)}</span>
+      </label>`;
+    }).join("");
+    return `<div class="field-item" style="grid-column:1/-1;">
+      <label class="field-label">${esc(field.label)}</label>
+      <div id="${id}" style="border:1px solid var(--border);border-radius:5px;padding:8px 10px;max-height:150px;overflow-y:auto;background:var(--cream);display:grid;grid-template-columns:1fr 1fr;gap:0 16px;">
+        ${boxes}
+      </div>
     </div>`;
   }
 
@@ -851,11 +893,18 @@ function gatherOrgData(subId) {
   if (membership === "true") data.has_membership = true;
   else if (membership === "false") data.has_membership = false;
 
-  const services = val("services");
-  if (services) data.services = services.split(",").map(s => s.trim()).filter(Boolean);
+  // Collect checked values from checkbox grids (canonical values only — no free text)
+  const svcEl = document.getElementById(`field-${subId}-services`);
+  if (svcEl) {
+    const checked = [...svcEl.querySelectorAll("input:checked")].map(cb => cb.value);
+    data.services = checked; // always write (empty array clears existing values)
+  }
 
-  const communities = val("communities_served");
-  if (communities) data.communities_served = communities.split(",").map(s => s.trim()).filter(Boolean);
+  const commEl = document.getElementById(`field-${subId}-communities_served`);
+  if (commEl) {
+    const checked = [...commEl.querySelectorAll("input:checked")].map(cb => cb.value);
+    data.communities_served = checked;
+  }
 
   return data;
 }

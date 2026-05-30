@@ -316,6 +316,9 @@ Rules:
 - If the org's focus is unclear from the name alone but the website confirms SAA identity → is_saa_org = true
 - confidence should reflect how certain you are, not how good the org is
 - communities_served and services: pick all that clearly apply, empty array if none fit
+- CRITICAL: use ONLY the exact strings provided in the communities and services lists above.
+  Do not paraphrase, abbreviate, or invent new values. "Odia" not "Odiya". "Bengali" not "Bangla".
+  If a value is not in the list, omit it rather than approximating.
 """
 
 
