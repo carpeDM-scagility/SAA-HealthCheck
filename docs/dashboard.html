@@ -707,7 +707,10 @@ function updatePendingBadge(count) {
   }
 }
 
-// ── Render pending submissions ────────────────────────────────
+// ── Pending pagination ────────────────────────────────────────
+const PAGE_SIZE  = 25;
+let   pendingPage = 0;
+
 function renderPending(subs) {
   const container = document.getElementById("pending-main");
 
@@ -720,16 +723,44 @@ function renderPending(subs) {
     return;
   }
 
+  const totalPages = Math.ceil(subs.length / PAGE_SIZE);
+  const page       = Math.min(pendingPage, totalPages - 1);
+  const start      = page * PAGE_SIZE;
+  const end        = Math.min(start + PAGE_SIZE, subs.length);
+  const pageSubs   = subs.slice(start, end);
+
+  const nav = `
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 0 16px;font-size:0.83rem;color:var(--text-soft);">
+      <button onclick="changePage(-1)" ${page === 0 ? "disabled" : ""}
+        style="padding:5px 12px;border:1px solid var(--border);border-radius:5px;background:var(--cream);cursor:pointer;font-size:0.82rem;">
+        ← Prev
+      </button>
+      <span>Page <strong>${page + 1}</strong> of <strong>${totalPages}</strong> &nbsp;·&nbsp; showing ${start + 1}–${end} of ${subs.length}</span>
+      <button onclick="changePage(1)" ${page >= totalPages - 1 ? "disabled" : ""}
+        style="padding:5px 12px;border:1px solid var(--border);border-radius:5px;background:var(--cream);cursor:pointer;font-size:0.82rem;">
+        Next →
+      </button>
+    </div>`;
+
   const header = `
     <div class="pending-header">
       <div>
         <h2>${subs.length} pending submission${subs.length !== 1 ? "s" : ""}</h2>
         <p>Review proposed changes before they go live in the directory.</p>
       </div>
-    </div>`;
+    </div>
+    ${nav}`;
 
-  const cards = subs.map(s => buildSubCard(s)).join("");
-  container.innerHTML = header + cards;
+  const cards = pageSubs.map(s => buildSubCard(s)).join("");
+  container.innerHTML = header + cards + nav;
+}
+
+function changePage(dir) {
+  const totalPages = Math.ceil(allPending.length / PAGE_SIZE);
+  pendingPage = Math.max(0, Math.min(pendingPage + dir, totalPages - 1));
+  renderPending(allPending);
+  // Scroll pending section back to top
+  document.getElementById("section-pending").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function buildSubCard(s) {
@@ -999,24 +1030,24 @@ async function rejectSub(id) {
 function removeCard(id) {
   const card = document.getElementById(`subcard-${id}`);
   if (card) {
-    card.style.transition = "opacity .3s";
+    card.style.transition = "opacity .25s";
     card.style.opacity = "0";
     setTimeout(() => {
-      card.remove();
-      // If no cards left, show empty state
-      if (!document.querySelector(".sub-card")) {
+      // Re-render the current page with the updated allPending list
+      // (allPending is already filtered before removeCard is called)
+      if (!allPending.length) {
         document.getElementById("pending-main").innerHTML = `
           <div class="pending-empty">
             <div class="empty-icon">✅</div>
             <p>No pending submissions — you're all caught up!</p>
           </div>`;
       } else {
-        // Update header count
-        const remaining = document.querySelectorAll(".sub-card").length;
-        const h = document.querySelector(".pending-header h2");
-        if (h) h.textContent = `${remaining} pending submission${remaining !== 1 ? "s" : ""}`;
+        // Stay on current page (or step back if page is now empty)
+        const totalPages = Math.ceil(allPending.length / PAGE_SIZE);
+        if (pendingPage >= totalPages) pendingPage = totalPages - 1;
+        renderPending(allPending);
       }
-    }, 300);
+    }, 280);
   }
 }
 
