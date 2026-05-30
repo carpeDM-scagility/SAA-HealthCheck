@@ -83,6 +83,14 @@
       padding: 4px 10px; cursor: pointer;
     }
     .logout-btn:hover { color: white; border-color: rgba(255,255,255,0.5); }
+    .rebuild-btn {
+      font-size: 0.8rem; color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.3); border-radius: 4px;
+      padding: 4px 10px; cursor: pointer; transition: background .15s;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .rebuild-btn:hover { background: rgba(255,255,255,0.2); color: white; }
+    .rebuild-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
     /* ── SUMMARY CARDS ── */
     .summary-bar {
@@ -403,6 +411,10 @@
       <span class="header-badge">Health Dashboard</span>
       <div class="header-right">
         <span class="last-updated" id="last-updated"></span>
+        <button class="rebuild-btn" id="rebuild-btn" onclick="triggerRebuild()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Regenerate site
+        </button>
         <button class="logout-btn" id="logout-btn">Sign out</button>
       </div>
     </div>
@@ -846,6 +858,31 @@ function gatherOrgData(subId) {
   if (communities) data.communities_served = communities.split(",").map(s => s.trim()).filter(Boolean);
 
   return data;
+}
+
+// ── Regenerate site ───────────────────────────────────────────
+async function triggerRebuild() {
+  const btn   = document.getElementById("rebuild-btn");
+  const token = sessionStorage.getItem("banyan_token") || "";
+  btn.disabled = true;
+  btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .8s linear infinite"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Triggering…`;
+
+  try {
+    const fnUrl = SB_URL.replace(/\/$/, "") + "/functions/v1/trigger-rebuild";
+    const res   = await fetch(fnUrl, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json", "apikey": SB_ANON },
+      body:    JSON.stringify({ token }),
+    });
+    const body = await res.json();
+    if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
+    showToast("Site rebuild triggered — changes live in ~1 minute ✓", false);
+  } catch(e) {
+    showToast("Rebuild failed: " + e.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Regenerate site`;
+  }
 }
 
 // ── Edge Function call (approve / reject) ─────────────────────
