@@ -101,6 +101,36 @@
     .empty h3 { font-size:1.1rem; margin-bottom:8px; color:var(--text-mid); }
     .loading { grid-column:1/-1; text-align:center; padding:64px; color:var(--text-soft); }
 
+    /* VIEW TOGGLE */
+    .view-toggle { display:flex; gap:0; background:rgba(255,255,255,.12); border-radius:6px; padding:2px; }
+    .view-toggle-btn { padding:6px 14px; border:none; border-radius:4px; font-size:.83rem; cursor:pointer; background:transparent; color:rgba(255,255,255,.55); display:inline-flex; align-items:center; gap:5px; font-family:inherit; transition:background .12s,color .12s; }
+    .view-toggle-btn.active { background:rgba(255,255,255,.2); color:white; }
+    .view-toggle-btn svg { width:14px; height:14px; flex-shrink:0; }
+
+    /* MAP VIEW */
+    #map-section { display:none; }
+    #map-section.visible { display:block; }
+    .map-frame { display:flex; background:#eae6e0; border-top:1px solid var(--border); }
+    .map-outer { flex:1; min-height:460px; position:relative; overflow:hidden; }
+    #map-svg { width:100%; height:460px; display:block; }
+    .map-legend { position:absolute; bottom:12px; left:12px; background:var(--white); border-radius:var(--radius); padding:8px 11px; font-size:.7rem; border:1px solid var(--border); }
+    .map-legend b { display:block; font-size:.72rem; color:var(--text-mid); margin-bottom:5px; }
+    .map-legend-row { display:flex; align-items:center; gap:5px; margin-bottom:3px; }
+    .map-hint { position:absolute; top:12px; right:12px; background:var(--white); border-radius:var(--radius); padding:5px 10px; font-size:.72rem; color:var(--text-soft); border:1px solid var(--border); }
+    .map-panel { width:0; overflow:hidden; transition:width .22s ease; background:var(--white); border-left:1px solid var(--border); }
+    .map-panel.open { width:268px; }
+    .map-panel-inner { width:268px; padding:14px; overflow-y:auto; max-height:460px; }
+    .map-panel-hd { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:10px; }
+    .map-panel-name { font-size:.95rem; font-weight:600; color:var(--text-dark); }
+    .map-panel-count { font-size:.78rem; color:var(--text-soft); margin-top:2px; }
+    .map-org-item { padding:7px 9px; border:1px solid var(--cream-dark); border-radius:6px; margin-bottom:5px; font-size:.78rem; color:var(--text-dark); line-height:1.35; background:var(--cream); cursor:pointer; transition:border-color .1s; }
+    .map-org-item:hover { border-color:var(--green-light); }
+    .map-show-all { display:inline-block; margin-bottom:10px; font-size:.75rem; padding:3px 10px; background:#e8f4ed; color:var(--green-deep); border-radius:20px; cursor:pointer; border:none; font-family:inherit; font-weight:500; }
+    .map-show-all:hover { background:#d0edde; }
+    .map-stats { display:flex; gap:20px; align-items:center; padding:9px 20px; background:var(--white); border-top:1px solid var(--border); font-size:.82rem; color:var(--text-soft); }
+    .map-stat-v { font-weight:600; color:var(--text-dark); font-size:.92rem; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
     /* MODAL */
     .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:500; align-items:flex-start; justify-content:center; padding:24px; overflow-y:auto; }
     .modal-overlay.open { display:flex; }
@@ -190,6 +220,16 @@
       </div>
     </a>
     <div class="header-actions">
+      <div class="view-toggle" role="group" aria-label="View mode">
+        <button class="view-toggle-btn active" id="btn-view-grid" onclick="setView('grid')" aria-pressed="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Grid
+        </button>
+        <button class="view-toggle-btn" id="btn-view-map" onclick="setView('map')" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+          Map
+        </button>
+      </div>
       <button class="btn-add-org" id="btn-add-org">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Add an Organization
@@ -227,6 +267,31 @@
 <main>
   <div class="grid" id="grid"><div class="loading">Loading organizations…</div></div>
 </main>
+
+<!-- ── MAP SECTION ──────────────────────────────────────────── -->
+<div id="map-section">
+  <div class="map-frame">
+    <div class="map-outer">
+      <svg id="map-svg" aria-label="US map showing organization counts by state"></svg>
+      <div class="map-legend">
+        <b>Orgs per state</b>
+        <div class="map-legend-row"><div style="width:10px;height:10px;border-radius:50%;background:#c8e6d4;border:1px solid #7ac4a0;flex-shrink:0"></div><span>1–10</span></div>
+        <div class="map-legend-row"><div style="width:13px;height:13px;border-radius:50%;background:#52b788;flex-shrink:0"></div><span>11–25</span></div>
+        <div class="map-legend-row"><div style="width:16px;height:16px;border-radius:50%;background:#1a4731;flex-shrink:0"></div><span>26+</span></div>
+      </div>
+      <div class="map-hint" id="map-hint">Click a state bubble to explore</div>
+    </div>
+    <div class="map-panel" id="map-panel">
+      <div class="map-panel-inner" id="map-panel-inner"></div>
+    </div>
+  </div>
+  <div class="map-stats">
+    <div><span class="map-stat-v" id="mstat-total">—</span> orgs mapped</div>
+    <div><span class="map-stat-v" id="mstat-states">—</span> states</div>
+    <div><span class="map-stat-v" id="mstat-top">—</span> most orgs</div>
+    <div style="margin-left:auto;font-size:.75rem;color:var(--text-soft)">Bubble size = org count · <button onclick="setView('grid')" style="background:none;border:none;cursor:pointer;color:var(--green-mid);font-size:.75rem;padding:0;font-family:inherit">Switch to grid →</button></div>
+  </div>
+</div>
 
 <footer>
   <p>Banyan is a community resource. Know of an org that's missing?
@@ -851,7 +916,156 @@ document.getElementById("submit-edit").addEventListener("click", async () => {
   }
 });
 
+// ── State FIPS ↔ abbreviation lookup ─────────────────────────
+const ABBR2FIPS = {
+  AL:"01",AK:"02",AZ:"04",AR:"05",CA:"06",CO:"08",CT:"09",DE:"10",DC:"11",
+  FL:"12",GA:"13",HI:"15",ID:"16",IL:"17",IN:"18",IA:"19",KS:"20",KY:"21",
+  LA:"22",ME:"23",MD:"24",MA:"25",MI:"26",MN:"27",MS:"28",MO:"29",MT:"30",
+  NE:"31",NV:"32",NH:"33",NJ:"34",NM:"35",NY:"36",NC:"37",ND:"38",OH:"39",
+  OK:"40",OR:"41",PA:"42",RI:"44",SC:"45",SD:"46",TN:"47",TX:"48",UT:"49",
+  VT:"50",VA:"51",WA:"53",WV:"54",WI:"55",WY:"56"
+};
+const FIPS2ABBR = Object.fromEntries(Object.entries(ABBR2FIPS).map(([k,v])=>[v,k]));
+
+// ── View toggle ───────────────────────────────────────────────
+let currentView = "grid";
+let mapRendered  = false;
+let mapSelected  = null;
+
+function setView(v) {
+  currentView = v;
+  document.getElementById("grid").style.display       = v === "grid" ? "" : "none";
+  document.getElementById("map-section").classList.toggle("visible", v === "map");
+  document.getElementById("btn-view-grid").classList.toggle("active", v === "grid");
+  document.getElementById("btn-view-grid").setAttribute("aria-pressed", v === "grid");
+  document.getElementById("btn-view-map").classList.toggle("active", v === "map");
+  document.getElementById("btn-view-map").setAttribute("aria-pressed", v === "map");
+  if (v === "map" && !mapRendered && allOrgs.length) { renderMap(); mapRendered = true; }
+}
+
+// ── Build state → orgs lookup ─────────────────────────────────
+function buildStateData() {
+  return allOrgs.reduce((acc, org) => {
+    if (org.state) { (acc[org.state] = acc[org.state] || []).push(org); }
+    return acc;
+  }, {});
+}
+
+// ── D3 map render ─────────────────────────────────────────────
+function mapFill(n) {
+  if (!n) return "#ddd8d0";
+  if (n<=5) return "#c8e6d4"; if (n<=10) return "#95cdb4";
+  if (n<=20) return "#52b788"; if (n<=30) return "#2d6a4f";
+  return "#1a4731";
+}
+
+function renderMap() {
+  const stateData = buildStateData();
+  const counts    = Object.fromEntries(Object.entries(stateData).map(([k,v])=>[k,v.length]));
+  const stList    = Object.keys(counts).sort((a,b)=>counts[b]-counts[a]);
+
+  document.getElementById("mstat-total").textContent  = allOrgs.filter(o=>o.state).length;
+  document.getElementById("mstat-states").textContent = stList.length;
+  if (stList[0]) document.getElementById("mstat-top").textContent = `${stList[0]} (${counts[stList[0]]})`;
+
+  d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json").then(us => {
+    const svg   = d3.select("#map-svg");
+    const W     = document.getElementById("map-section").querySelector(".map-outer").clientWidth || 600;
+    const H     = 460;
+    svg.attr("viewBox", `0 0 ${W} ${H}`);
+
+    const feats = topojson.feature(us, us.objects.states);
+    const proj  = d3.geoAlbersUsa().fitExtent([[16,16],[W-16,H-16]], feats);
+    const gpath = d3.geoPath().projection(proj);
+
+    svg.selectAll(".stp")
+      .data(feats.features).join("path")
+      .attr("class","stp")
+      .attr("id", d => "stp-" + String(d.id).padStart(2,"0"))
+      .attr("d", gpath)
+      .attr("fill", d => mapFill(counts[FIPS2ABBR[String(d.id).padStart(2,"0")]] || 0))
+      .attr("stroke","#fff").attr("stroke-width",0.5)
+      .style("cursor", d => counts[FIPS2ABBR[String(d.id).padStart(2,"0")]] ? "pointer" : "default")
+      .on("mouseover", function(e,d) {
+        const abbr = FIPS2ABBR[String(d.id).padStart(2,"0")];
+        if (counts[abbr] && abbr !== mapSelected) d3.select(this).attr("stroke","#c97d2e").attr("stroke-width",1.5);
+      })
+      .on("mouseout", function(e,d) {
+        const abbr = FIPS2ABBR[String(d.id).padStart(2,"0")];
+        if (abbr !== mapSelected) d3.select(this).attr("stroke","#fff").attr("stroke-width",0.5);
+      })
+      .on("click", (e,d) => {
+        const abbr = FIPS2ABBR[String(d.id).padStart(2,"0")];
+        if (stateData[abbr]) openMapPanel(abbr, stateData[abbr]);
+      });
+
+    feats.features.forEach(d => {
+      const fips = String(d.id).padStart(2,"0");
+      const abbr = FIPS2ABBR[fips];
+      const n    = counts[abbr]; if (!n) return;
+      const c    = gpath.centroid(d);
+      if (!c || isNaN(c[0])) return;
+      const r = Math.sqrt(n) * 2.5;
+      const g = svg.append("g").attr("transform",`translate(${c[0]},${c[1]})`).style("cursor","pointer")
+        .on("click", () => openMapPanel(abbr, stateData[abbr]));
+      g.append("circle").attr("r",r)
+        .attr("fill", n>25 ? "#c97d2e" : "rgba(201,125,46,.82)")
+        .attr("stroke","white").attr("stroke-width",1);
+      if (r > 9) g.append("text").attr("text-anchor","middle").attr("dy","0.35em")
+        .attr("font-size", Math.min(r*.85, 11)).attr("font-weight","600")
+        .attr("fill","white").attr("pointer-events","none").text(n);
+    });
+
+  }).catch(() => {
+    document.getElementById("map-hint").textContent = "Map data unavailable";
+  });
+}
+
+function openMapPanel(abbr, orgs) {
+  mapSelected = abbr;
+  document.getElementById("map-hint").style.display = "none";
+  d3.selectAll(".stp").attr("stroke","#fff").attr("stroke-width",0.5);
+  const fips = ABBR2FIPS[abbr];
+  if (fips) d3.select(`#stp-${fips}`).attr("stroke","#c97d2e").attr("stroke-width",2);
+
+  const shown = orgs.slice(0,8), extra = orgs.length - shown.length;
+  document.getElementById("map-panel-inner").innerHTML = `
+    <div class="map-panel-hd">
+      <div>
+        <div class="map-panel-name">${esc(abbr)}</div>
+        <div class="map-panel-count">${orgs.length} organization${orgs.length!==1?"s":""}</div>
+      </div>
+      <button onclick="closeMapPanel()" style="background:none;border:none;cursor:pointer;color:var(--text-soft);font-size:20px;line-height:1;padding:0" aria-label="Close">×</button>
+    </div>
+    <button class="map-show-all" onclick="showStateGrid('${esc(abbr)}')">Show all on grid →</button>
+    ${shown.map(o=>`
+      <div class="map-org-item" onclick="showStateGrid('${esc(abbr)}')">
+        <div>${esc(o.name)}</div>
+        ${o.scope_of_service||o.service_area ? `<span style="font-size:.7rem;color:var(--text-soft)">${esc(o.scope_of_service||o.service_area)}</span>` : ""}
+      </div>`).join("")}
+    ${extra > 0 ? `<div style="text-align:center;padding:8px;font-size:.75rem;color:var(--text-soft)">+${extra} more</div>` : ""}
+  `;
+  document.getElementById("map-panel").classList.add("open");
+}
+
+function closeMapPanel() {
+  document.getElementById("map-panel").classList.remove("open");
+  document.getElementById("map-hint").style.display = "";
+  mapSelected = null;
+  d3.selectAll(".stp").attr("stroke","#fff").attr("stroke-width",0.5);
+}
+
+function showStateGrid(abbr) {
+  filters.state = abbr;
+  document.getElementById("filter-state").value = abbr;
+  renderActiveFilters();
+  setView("grid");
+  render();
+}
+
 loadData();
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js" defer></script>
 </body>
 </html>
